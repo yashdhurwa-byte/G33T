@@ -151,14 +151,62 @@ class PlayerWidgetProvider : AppWidgetProvider() {
             }
             val views = RemoteViews(context.packageName, layout)
             val colors = palette(context, theme, seed(state))
-            views.setInt(R.id.player_widget_background, "setColorFilter", colors.container)
+
+            val themeEngine = state.optString("themeEngine", "mornye")
+            val isEngineA = themeEngine != "material"
+
+            // Colors matching active theme engine
+            // Engine A: AMOLED black (#0D0D12), electric violet (#8B5CF6), warm soft beige (#F5F0EB)
+            // Engine B: Sakura pink (#FCE4EC), Deep Royal Purple (#6A1B9A)
+            val containerColor = if (isEngineA) 0xF20D0D12.toInt() else 0xFFFCE4EC.toInt()
+            val titleColor = if (isEngineA) 0xFFF5F0EB.toInt() else 0xFF2E0854.toInt()
+            val artistColor = if (isEngineA) 0xFFA1A1AA.toInt() else 0xFF6A1B9A.toInt()
+            val telemetryColor = if (isEngineA) 0xFF8B5CF6.toInt() else 0xFF6A1B9A.toInt()
+            val lyricsColor = if (isEngineA) 0xFFF5F0EB.toInt() else 0xFF2E0854.toInt()
+            val playBg = if (isEngineA) 0xFF8B5CF6.toInt() else 0xFF6A1B9A.toInt()
+            val playTint = 0xFFFFFFFF.toInt()
+            val skipBg = if (isEngineA) 0x228B5CF6.toInt() else 0x266A1B9A.toInt()
+            val skipTint = if (isEngineA) 0xFFF5F0EB.toInt() else 0xFF6A1B9A.toInt()
+
+            val isCustomTheme = theme == "light" || theme == "dark"
+            val effectiveContainerColor = if (isCustomTheme) colors.container else containerColor
+            val effectiveTitleColor = if (isCustomTheme) colors.onContainer else titleColor
+            val effectiveArtistColor = if (isCustomTheme) colors.onContainerVariant else artistColor
+            val effectivePlayBg = if (isCustomTheme) colors.primary else playBg
+            val effectivePlayTint = if (isCustomTheme) colors.onPrimary else playTint
+            val effectiveSkipBg = if (isCustomTheme) colors.tonal else skipBg
+            val effectiveSkipTint = if (isCustomTheme) colors.onTonal else skipTint
+
+            views.setInt(R.id.player_widget_background, "setColorFilter", effectiveContainerColor)
             views.setTextViewText(R.id.player_widget_title, state.optString("title").ifEmpty { context.getString(R.string.player_widget_name) })
             views.setTextViewText(R.id.player_widget_artist, if (active) state.optString("artist") else context.getString(R.string.player_widget_empty))
             views.setViewVisibility(R.id.player_widget_artist, if (showArtist) View.VISIBLE else View.GONE)
             // Over a full-bleed cover the text sits on a dark scrim.
             val overCover = compact && cover != null
-            views.setTextColor(R.id.player_widget_title, if (overCover) Color.WHITE else colors.onContainer)
-            views.setTextColor(R.id.player_widget_artist, if (overCover) 0xd9ffffff.toInt() else colors.onContainerVariant)
+            views.setTextColor(R.id.player_widget_title, if (overCover) Color.WHITE else effectiveTitleColor)
+            views.setTextColor(R.id.player_widget_artist, if (overCover) 0xd9ffffff.toInt() else effectiveArtistColor)
+
+            if (!compact) {
+                val telemetry = state.optString("telemetry").ifEmpty {
+                    val format = state.optString("format", "FLAC").uppercase()
+                    val sampleRate = state.optString("sampleRate", "96kHz")
+                    val bitDepth = state.optString("bitDepth", "24-bit")
+                    "$format • $sampleRate / $bitDepth"
+                }
+                val rawLyric = state.optString("lyric").trim()
+                val lyricText = if (rawLyric.isNotEmpty()) {
+                    "“$rawLyric”"
+                } else if (active) {
+                    "“Synchronizing lyrics…”"
+                } else {
+                    "“G33T High-Fidelity Audio”"
+                }
+                views.setTextViewText(R.id.player_widget_telemetry, telemetry)
+                views.setTextColor(R.id.player_widget_telemetry, telemetryColor)
+                views.setTextViewText(R.id.player_widget_lyrics, lyricText)
+                views.setTextColor(R.id.player_widget_lyrics, lyricsColor)
+            }
+
             views.setImageViewBitmap(R.id.player_widget_art, when {
                 compact -> filledCover(context, cover, width, height, density, corner, colors)
                 cover != null -> roundedCover(cover)
@@ -185,12 +233,12 @@ class PlayerWidgetProvider : AppWidgetProvider() {
             // Expressive shape morph: a pill while paused, a rounder square while playing.
             views.setImageViewResource(R.id.player_widget_play_shape, if (playing) R.drawable.widget_shape_squircle else R.drawable.widget_shape_pill)
             bind(R.id.player_widget_play, R.id.player_widget_play_shape, R.id.player_widget_play_icon,
-                if (playing) R.drawable.ic_widget_pause else R.drawable.ic_widget_play, colors.primary, colors.onPrimary, "toggle")
+                if (playing) R.drawable.ic_widget_pause else R.drawable.ic_widget_play, effectivePlayBg, effectivePlayTint, "toggle")
             if (!compact) {
                 bind(R.id.player_widget_previous, R.id.player_widget_previous_shape, R.id.player_widget_previous_icon,
-                    R.drawable.ic_widget_previous, colors.tonal, colors.onTonal, "previous")
+                    R.drawable.ic_widget_previous, effectiveSkipBg, effectiveSkipTint, "previous")
                 bind(R.id.player_widget_next, R.id.player_widget_next_shape, R.id.player_widget_next_icon,
-                    R.drawable.ic_widget_next, colors.tonal, colors.onTonal, "next")
+                    R.drawable.ic_widget_next, effectiveSkipBg, effectiveSkipTint, "next")
             }
             views.setContentDescription(R.id.player_widget_play, context.getString(if (playing) R.string.player_widget_pause else R.string.player_widget_play))
             views.setOnClickPendingIntent(R.id.player_widget_root, launchIntent(context, "open"))

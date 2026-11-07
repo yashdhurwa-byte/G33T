@@ -115,7 +115,7 @@ class _SpatialCoverFlowState extends ConsumerState<SpatialCoverFlow> {
   Widget build(BuildContext context) {
     final mornye = context.isMornye;
     final primaryAccent = mornye ? const Color(0xFF8B5CF6) : const Color(0xFF6A1B9A);
-    final titleColor = mornye ? Colors.white : const Color(0xFF1D1B20);
+    final titleColor = mornye ? const Color(0xFFF5F0EB) : const Color(0xFF1D1B20);
     final subtitleColor = mornye ? const Color(0xFFA1A1AA) : const Color(0xFF6A1B9A);
 
     if (widget.items.isEmpty) {

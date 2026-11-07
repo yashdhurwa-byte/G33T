@@ -71,6 +71,7 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
 
   static const Color pureBlack = Color(0xFF000000);
   static const Color electricViolet = Color(0xFF8B5CF6);
+  static const Color warmSoftBeige = Color(0xFFF5F0EB);
   static const Color starkWhite = Color(0xFFFFFFFF);
 
   static Color accentColor(MornyeAccent accent, Brightness brightness) {
@@ -252,9 +253,9 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
     required bool useSystemFont,
     String? fontFamily,
   }) {
-    // Engine A (Mornye Engine: pure black #000000, electric violet #8B5CF6, stark white #FFFFFF)
+    // Engine A (Mornye Engine: pure black #000000, electric violet #8B5CF6, warm soft beige #F5F0EB)
     final accent = electricViolet;
-    final foreground = starkWhite;
+    final foreground = warmSoftBeige;
     final surface = pureBlack;
     final grouped = pureBlack;
     final secondary = const Color(0xff98989f);
@@ -264,11 +265,11 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
           brightness: Brightness.dark,
         ).copyWith(
           primary: accent,
-          onPrimary: starkWhite,
+          onPrimary: warmSoftBeige,
           primaryContainer: pureBlack,
           onPrimaryContainer: accent,
           secondary: accent,
-          onSecondary: starkWhite,
+          onSecondary: warmSoftBeige,
           secondaryContainer: pureBlack,
           onSecondaryContainer: foreground,
           surface: surface,
@@ -279,8 +280,8 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
           surfaceContainerHigh: pureBlack,
           surfaceContainerHighest: const Color(0xff18181b),
           onSurfaceVariant: secondary,
-          outline: secondary,
-          outlineVariant: const Color(0xff27272a),
+          outline: warmSoftBeige.withValues(alpha: 0.35),
+          outlineVariant: warmSoftBeige.withValues(alpha: 0.20),
           surfaceTint: Colors.transparent,
         );
     // Cupertino's font proxies resolve to SF on Apple and the platform fallback

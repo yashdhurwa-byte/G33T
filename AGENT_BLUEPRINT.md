@@ -150,3 +150,26 @@ G33T (Mornye) is a high-performance, audiophile-grade mobile music utility built
 ### Validation Criteria
 - `cargo check --workspace`: 0 errors, 0 warnings.
 - `flutter analyze`: 0 errors, 0 warnings.
+
+---
+
+## STAGE 6: Home Screen Widget & Engine A Color Tuning
+
+### 1. Engine A Color Update
+- **Theme Engine A (Mornye Engine) Tuning**:
+  - AMOLED Black background: `#000000`
+  - Electric Violet accents: `#8B5CF6`
+  - Warm Soft Beige: `#F5F0EB` replacing stark white for primary typography, borders, and tactile highlights.
+- **Theme Engine B (Google Material UI)**: Kept unchanged (`#FFFFFF` background, `#FCE4EC` Sakura pink cards/pills, `#6A1B9A` Deep Royal Purple accents).
+
+### 2. Native Android Home Screen Widget (`AppWidgetProvider`)
+- Custom home screen widget styled after floating card reference design:
+  - **Frosted Glass Container Card**: Dynamically matched to the active theme engine (`#0D0D12` dark frosted glass for Engine A, `#FCE4EC` for Engine B).
+  - **Top Section**: Track title, artist name, and mini FLAC telemetry/waveform badge (`FLAC • 96kHz / 24-bit`).
+  - **Center Section**: Live-synced lyrics text box with quotation marks (`“...”`) displaying the active lyric line in warm beige / electric violet.
+  - **Bottom Section**: Compact quick-action playback control pills (`widget_player_controls`: previous, play/pause, next).
+  - **Service & Notification Wiring**: Live synchronized lyric line updates from `NotificationLyricsBridge` stream directly to the widget, updating the home screen in real-time alongside Samsung One UI and Android MediaSession notifications.
+
+### Validation Criteria
+- `cargo check --workspace`: 0 errors, 0 warnings.
+- `flutter analyze`: 0 errors, 0 warnings.

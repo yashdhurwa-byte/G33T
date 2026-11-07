@@ -7,6 +7,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mornye/services/cover_cache_manager.dart';
+import 'package:mornye/services/notification_lyrics_bridge.dart';
 import 'package:mornye/utils/logger.dart';
 
 class PlayerWidgetArtwork {
@@ -43,6 +44,13 @@ class PlayerWidgetService {
   Future<void> _writes = Future.value();
   Future<void> _commands = Future.value();
   bool _initialized = false;
+  String _themeEngine = 'mornye';
+
+  void setThemeEngine(String engine) {
+    if (_themeEngine == engine) return;
+    _themeEngine = engine;
+    unawaited(publish(force: true));
+  }
 
   Future<void> initialize(Future<void> Function(String) onCommand) async {
     if (_initialized) return;
@@ -173,10 +181,28 @@ class PlayerWidgetService {
     if (handler == null) return Future.value();
     final item = handler.mediaItem.value;
     final state = handler.playbackState.value;
+
+    final lyric = NotificationLyricsBridge.instance.currentLyric ?? '';
+    final meta = item?.extras ?? const {};
+    final format = meta['format']?.toString() ??
+        meta['audio_codec']?.toString() ??
+        'FLAC';
+    final bitDepth = meta['bit_depth']?.toString() ?? '24-bit';
+    final rawSampleRate = int.tryParse(meta['sample_rate']?.toString() ?? '');
+    final sampleRate = rawSampleRate != null
+        ? '${(rawSampleRate / 1000).toStringAsFixed(1)}kHz'
+        : '96.0kHz';
+    final telemetry = '$format • $sampleRate / $bitDepth';
+
+    final rawArtist = item?.artist ?? '';
+    final cleanArtist = (item?.extras?['originalArtist'] as String?)?.isNotEmpty == true
+        ? item!.extras!['originalArtist'] as String
+        : (rawArtist.contains(' • ') ? rawArtist.split(' • ').first : rawArtist);
+
     final payload = <String, Object?>{
       'id': item?.id ?? '',
       'title': item?.title ?? '',
-      'artist': item?.artist ?? '',
+      'artist': cleanArtist,
       'album': item?.album ?? '',
       'playing': item != null && state.playing,
       'canPlay': item != null,
@@ -188,6 +214,12 @@ class PlayerWidgetService {
       ),
       'artworkKey': _artwork == null ? '' : _artUri.toString(),
       'background': _artwork?.background ?? 0xff292433,
+      'lyric': lyric,
+      'format': format,
+      'bitDepth': bitDepth,
+      'sampleRate': sampleRate,
+      'telemetry': telemetry,
+      'themeEngine': _themeEngine,
     };
     final key = jsonEncode(payload);
     if (!force && key == _lastPayload) return _writes;

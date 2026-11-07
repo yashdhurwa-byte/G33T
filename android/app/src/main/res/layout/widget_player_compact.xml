@@ -24,4 +24,8 @@
                 android:src="@drawable/ic_widget_play" android:tint="@color/widgetOnAccent" android:importantForAccessibility="no" />
         </FrameLayout>
     </LinearLayout>
+
+    <!-- Stub views for compact layout compatibility -->
+    <TextView android:id="@+id/player_widget_telemetry" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <TextView android:id="@+id/player_widget_lyrics" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
 </FrameLayout>

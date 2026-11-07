@@ -90,7 +90,7 @@ class _DopamineDesktopPlayerState extends ConsumerState<DopamineDesktopPlayer> {
     final colorScheme = theme.colorScheme;
 
     // Theme Engine Colors
-    // Engine A: AMOLED black (#000000), electric violet (#8B5CF6), stark white (#FFFFFF)
+    // Engine A: AMOLED black (#000000), electric violet (#8B5CF6), warm soft beige (#F5F0EB)
     // Engine B: Pure white (#FFFFFF), Sakura pink (#FCE4EC), Deep Royal Purple (#6A1B9A)
     final bgColor = mornye ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
     final primaryAccent = mornye ? const Color(0xFF8B5CF6) : const Color(0xFF6A1B9A);
@@ -98,9 +98,9 @@ class _DopamineDesktopPlayerState extends ConsumerState<DopamineDesktopPlayer> {
         ? const Color(0xFF0C0C0F).withValues(alpha: 0.88)
         : const Color(0xFFFCE4EC).withValues(alpha: 0.85);
     final panelBorder = mornye
-        ? const Color(0xFF8B5CF6).withValues(alpha: 0.20)
+        ? const Color(0xFFF5F0EB).withValues(alpha: 0.20)
         : const Color(0xFF6A1B9A).withValues(alpha: 0.20);
-    final titleColor = mornye ? Colors.white : const Color(0xFF1D1B20);
+    final titleColor = mornye ? const Color(0xFFF5F0EB) : const Color(0xFF1D1B20);
     final subtitleColor = mornye ? const Color(0xFFA1A1AA) : const Color(0xFF6A1B9A);
 
     return Scaffold(

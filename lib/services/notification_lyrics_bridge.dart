@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mornye/services/player_widget_service.dart';
 import 'package:mornye/utils/lyrics_parser.dart';
 import 'package:mornye/utils/vorbis_metadata_utils.dart';
 
@@ -25,6 +26,7 @@ class NotificationLyricsBridge {
   bool _isEmittingNotification = false;
 
   bool get isEnabled => _enabled;
+  String? get currentLyric => _lastEmittedLyric;
 
   void setEnabled(bool enabled) {
     _enabled = enabled;
@@ -180,6 +182,7 @@ class NotificationLyricsBridge {
       );
 
       service.mediaItem.add(updated);
+      unawaited(PlayerWidgetService.instance.publish(force: true));
     } finally {
       _isEmittingNotification = false;
     }
@@ -218,6 +221,7 @@ class NotificationLyricsBridge {
         },
       );
       service.mediaItem.add(reverted);
+      unawaited(PlayerWidgetService.instance.publish(force: true));
     } finally {
       _isEmittingNotification = false;
     }

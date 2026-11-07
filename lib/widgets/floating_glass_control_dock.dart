@@ -48,16 +48,16 @@ class FloatingGlassControlDock extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     // Theme Engine Colors
-    // Engine A: #000000 AMOLED black, #8B5CF6 electric violet, #FFFFFF stark white
+    // Engine A: #000000 AMOLED black, #8B5CF6 electric violet, #F5F0EB warm soft beige
     // Engine B: #FFFFFF background, #FCE4EC Sakura pink, #6A1B9A Deep Royal Purple
     final primaryAccent = mornye ? const Color(0xFF8B5CF6) : const Color(0xFF6A1B9A);
     final dockBg = mornye
         ? const Color(0xFF0F0F14).withValues(alpha: 0.72)
         : const Color(0xFFFCE4EC).withValues(alpha: 0.82);
     final dockBorder = mornye
-        ? const Color(0xFF8B5CF6).withValues(alpha: 0.35)
+        ? const Color(0xFFF5F0EB).withValues(alpha: 0.30)
         : const Color(0xFF6A1B9A).withValues(alpha: 0.25);
-    final titleColor = mornye ? Colors.white : const Color(0xFF1D1B20);
+    final titleColor = mornye ? const Color(0xFFF5F0EB) : const Color(0xFF1D1B20);
 
     return Padding(
       padding: padding,

@@ -126,12 +126,12 @@ class _AudioSignalTelemetryHudState extends ConsumerState<AudioSignalTelemetryHu
         ? const Color(0xFF141416)
         : const Color(0xFFFCE4EC); // Sakura pink for Material
     final pillBorder = isMornye
-        ? const Color(0xFF8B5CF6).withValues(alpha: 0.35) // Electric violet border
+        ? const Color(0xFFF5F0EB).withValues(alpha: 0.30) // Warm soft beige border
         : const Color(0xFF6A1B9A).withValues(alpha: 0.25); // Deep purple border
     final accentColor = isMornye
         ? const Color(0xFF8B5CF6) // Electric violet
         : const Color(0xFF6A1B9A); // Deep Royal Purple
-    final textColor = isMornye ? Colors.white : const Color(0xFF2E0854);
+    final textColor = isMornye ? const Color(0xFFF5F0EB) : const Color(0xFF2E0854);
     final secondaryTextColor = isMornye ? const Color(0xFFA1A1AA) : const Color(0xFF6A1B9A);
 
     return Center(

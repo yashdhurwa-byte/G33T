@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart' as material_ui;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mornye/models/theme_settings.dart';
+import 'package:mornye/services/player_widget_service.dart';
 
 final initialThemeSettingsProvider = Provider<ThemeSettings>(
   (ref) => ThemeSettings(style: defaultAppThemeStyle()),
@@ -143,7 +144,10 @@ class ThemeNotifier extends Notifier<ThemeSettings> {
       for (final edit in _loadingEdits) {
         loaded = edit(loaded);
       }
-      if (ref.mounted) state = loaded;
+      if (ref.mounted) {
+        state = loaded;
+        PlayerWidgetService.instance.setThemeEngine(loaded.style.name);
+      }
     } catch (e) {
       debugPrint('Error loading theme settings: $e');
     } finally {
@@ -163,6 +167,7 @@ class ThemeNotifier extends Notifier<ThemeSettings> {
       final prefs = await _prefs;
       if (!ref.mounted) return;
       final snapshot = state;
+      PlayerWidgetService.instance.setThemeEngine(snapshot.style.name);
       await prefs.setString(kThemeModeKey, snapshot.themeMode.name);
       await prefs.setBool(kUseDynamicColorKey, snapshot.useDynamicColor);
       await prefs.setInt(kSeedColorKey, snapshot.seedColorValue);
