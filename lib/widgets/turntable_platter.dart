@@ -22,6 +22,7 @@ class TurntablePlatter extends ConsumerStatefulWidget {
     this.onTap,
     this.onDoubleTap,
     this.showTonearm = true,
+    this.accentColor,
   });
 
   final MediaItem mediaItem;
@@ -29,6 +30,7 @@ class TurntablePlatter extends ConsumerStatefulWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final bool showTonearm;
+  final Color? accentColor;
 
   @override
   ConsumerState<TurntablePlatter> createState() => _TurntablePlatterState();
@@ -241,7 +243,7 @@ class _TurntablePlatterState extends ConsumerState<TurntablePlatter>
                         duration: const Duration(milliseconds: 400),
                         curve: Curves.easeInOutCubic,
                         alignment: Alignment.topRight,
-                        child: const _TonearmWidget(),
+                        child: _TonearmWidget(accentColor: widget.accentColor),
                       ),
                     ),
                 ],
@@ -333,21 +335,25 @@ class _VinylRecordPainter extends CustomPainter {
 
 /// Sleek phonograph tonearm
 class _TonearmWidget extends StatelessWidget {
-  const _TonearmWidget();
+  const _TonearmWidget({this.accentColor});
+
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: CustomPaint(
         size: const Size(64, 110),
-        painter: const _TonearmPainter(),
+        painter: _TonearmPainter(accentColor: accentColor),
       ),
     );
   }
 }
 
 class _TonearmPainter extends CustomPainter {
-  const _TonearmPainter();
+  const _TonearmPainter({this.accentColor});
+
+  final Color? accentColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -373,7 +379,7 @@ class _TonearmPainter extends CustomPainter {
     canvas.drawPath(armPath, armPaint);
 
     // Headshell / Cartridge at tip
-    final cartridgePaint = Paint()..color = const Color(0xFF8B5CF6);
+    final cartridgePaint = Paint()..color = accentColor ?? const Color(0xFF8B5CF6);
     final cartridgeRect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: const Offset(12, 98), width: 10, height: 16),
       const Radius.circular(2),
@@ -382,5 +388,6 @@ class _TonearmPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _TonearmPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _TonearmPainter oldDelegate) =>
+      oldDelegate.accentColor != accentColor;
 }

@@ -104,3 +104,24 @@ G33T (Mornye) is a high-performance, audiophile-grade mobile music utility built
 ### Validation Criteria
 - `cargo check --workspace`: 0 errors, 0 warnings.
 - `flutter analyze`: 0 errors, 0 warnings.
+
+---
+
+## STAGE 4: Full-Screen Landscape Desktop Mode & Theme Synchronization
+
+### 1. Full-Screen Landscape Desktop Mode (Dopamine-Inspired)
+- Immersive, full-screen desktop mode layout (`DopamineDesktopPlayer`) inspired by Dopamine's layout:
+  - Large digital spinning vinyl platter (`TurntablePlatter`) with continuous monotonic unidirectional rotation, realistic grooves, specular sheen reflection, center circular album art label, metallic spindle pin, and gesture controls (scratching, tap-to-pause, fling to skip).
+  - Centered live hardware audio & DAC signal telemetry HUD pill (`AudioSignalTelemetryHud`) displaying codec/format, sample rate (kHz), bit depth, instantaneous bitrate (kbps), active hardware output route, and pulsing bit-perfect LED.
+  - Full real-time synchronized lyrics ticker (`PlayerLyricsSection`) with line-by-line highlight, smooth scrolling, animated words, and tap-to-seek timestamp capabilities, switchable to Up Next queue.
+  - Top utility bar with close/minimize, fullscreen toggle, audio output device selector (`AudioOutputButton`), equalizer shortcut, and Lyrics/Queue switcher capsule.
+  - Seamless orientation handling for tablet and desktop form factors (automatic presentation on landscape rotation and tablet wide screens, plus explicit one-tap Full-Screen Desktop Mode toggle from portrait).
+
+### 2. Dual Theme Engine Synchronization
+- Complete layout styling dynamically bound to the active engine:
+  - **Engine A (Mornye Engine):** Pure AMOLED Black (`#000000`), Electric Violet (`#8B5CF6`) primary accents and active highlights, Stark White (`#FFFFFF`) typography and icons.
+  - **Engine B (Google Material UI):** Crisp White (`#FFFFFF`) background, Sakura Pink (`#FCE4EC`) cards and pills, Deep Royal Purple (`#6A1B9A`) primary accents and typography, with `useDynamicColor: false`.
+
+### Validation Criteria
+- `cargo check --workspace`: 0 errors, 0 warnings.
+- `flutter analyze`: 0 errors, 0 warnings.

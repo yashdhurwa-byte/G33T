@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:flutter/services.dart' show SystemUiOverlayStyle;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:mornye/controllers/clickable_metadata.dart';
@@ -54,6 +54,8 @@ import 'package:mornye/widgets/mornye_player_actions_sheet.dart';
 import 'package:mornye/widgets/mornye_context_menu.dart';
 import 'package:mornye/widgets/mornye_player_artwork.dart';
 import 'package:mornye/providers/player_motion_artwork_provider.dart';
+import 'package:mornye/services/app_orientation.dart';
+import 'package:mornye/widgets/desktop/dopamine_desktop_player.dart';
 
 export 'package:mornye/routes/now_playing_route.dart';
 
@@ -130,6 +132,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
   late final LyricsTranslationController _lyricsTranslation;
   late int _currentPage = widget.initialPage;
   bool _landscape = false;
+  bool _forceDesktopMode = false;
   bool _queueSheetShowing = false;
   String? _measuredMotionSource;
   double? _motionAspectRatio;
@@ -209,11 +212,25 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final size = MediaQuery.sizeOf(context);
-    _landscape = context.isMornye && size.width > size.height;
+    _landscape = size.width > size.height ||
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     if (!_lyricsAutoHideLayout || MediaQuery.accessibleNavigationOf(context)) {
       _lyricsControlsHidden = false;
     }
     _scheduleLyricsControlsHide();
+  }
+
+  Future<void> _toggleDesktopMode() async {
+    final next = !_forceDesktopMode;
+    setState(() => _forceDesktopMode = next);
+    if (next) {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      await setAppOrientation(playerVisible: true);
+    }
   }
 
   void _onInspectorChanged() {
@@ -257,6 +274,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
 
   @override
   void dispose() {
+    if (_forceDesktopMode) {
+      unawaited(setAppOrientation(playerVisible: false));
+    }
     if (widget.embedded) {
       desktopInspectorPanel.removeListener(_onInspectorChanged);
     }
@@ -283,6 +303,23 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       return const SizedBox.shrink();
     }
     final mediaItem = ref.watch(currentMediaItemProvider).value;
+    final isDesktopView = (_landscape || _forceDesktopMode) && !widget.embedded;
+    if (isDesktopView && mediaItem != null) {
+      return DopamineDesktopPlayer(
+        mediaItem: mediaItem,
+        metadata: _trackMetadata,
+        seekPreview: _seekPreview,
+        onClose: () {
+          if (_forceDesktopMode) {
+            _toggleDesktopMode();
+          } else {
+            _minimize();
+          }
+        },
+        onToggleFullScreen: _toggleDesktopMode,
+        isFullScreen: _forceDesktopMode,
+      );
+    }
     final mornye = context.isMornye;
     final fullScreenCover = ref.watch(
       settingsProvider.select(
@@ -525,8 +562,21 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   onPressed: _minimize,
                 ),
           actions: mornye
-              ? null
+              ? [
+                  IconButton(
+                    tooltip: 'Full-Screen Desktop Mode',
+                    color: Colors.white,
+                    icon: const Icon(CupertinoIcons.desktopcomputer, size: 20),
+                    onPressed: _toggleDesktopMode,
+                  ),
+                ]
               : [
+                  AppIconButton(
+                    tooltip: 'Full-Screen Desktop Mode',
+                    color: overCover ? Colors.white : null,
+                    icon: const AppIcon(Icons.desktop_windows_rounded),
+                    onPressed: _toggleDesktopMode,
+                  ),
                   LinkDevicesButton(color: overCover ? Colors.white : null),
                   AppIconButton(
                     tooltip: context.l10n.nowPlayingUpNext,
