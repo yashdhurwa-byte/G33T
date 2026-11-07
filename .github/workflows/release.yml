@@ -72,11 +72,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java 21
+      - name: Setup Java 25
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: "21"
+          java-version: "25"
 
       - name: Cache Android NDK
         uses: actions/cache@v4
@@ -89,8 +89,9 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
             "ndk;30.0.16248370" \
-            "platforms;android-34" \
-            "build-tools;34.0.0"
+            "platforms;android-37.0" \
+            "build-tools;37.0.0" \
+            "cmake;4.1.2"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370" >> "$GITHUB_ENV"
 
       - name: Activate pinned Rust toolchain
@@ -168,7 +169,7 @@ jobs:
             signing_dir="$(mktemp -d "$RUNNER_TEMP/mornye-signing.XXXXXX")"
             trap 'rm -rf "$signing_dir"' EXIT
             printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$signing_dir/release.jks"
-            apksigner="$ANDROID_HOME/build-tools/34.0.0/apksigner"
+            apksigner="$ANDROID_HOME/build-tools/37.0.0/apksigner"
             export KEY_PASSWORD="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
 
             "$apksigner" sign \
