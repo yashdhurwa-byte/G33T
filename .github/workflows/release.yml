@@ -2,17 +2,19 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
   workflow_dispatch:
     inputs:
       version:
         description: "Version tag (e.g., v1.0.0)"
-        required: true
+        required: false
         default: "v1.0.0"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -20,6 +22,7 @@ concurrency:
 
 jobs:
   get-version:
+    name: Resolve Version
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -31,19 +34,17 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
             VERSION="$INPUT_VERSION"
-          else
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-          if [[ ! "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
-            echo "Invalid release version" >&2
-            exit 1
+          else
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            VERSION="v1.0.0-build.${SHORT_SHA}"
           fi
           printf 'version=%s\n' "$VERSION" >> "$GITHUB_OUTPUT"
 
-          VERSION_LOWER=$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')
-          if [[ "$VERSION_LOWER" == *"-preview"* ]] || [[ "$VERSION_LOWER" == *"-beta"* ]] || [[ "$VERSION_LOWER" == *"-rc"* ]] || [[ "$VERSION_LOWER" == *"-alpha"* ]]; then
+          if [[ "$VERSION" == *"-"* ]]; then
             echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
             echo "Detected pre-release version: $VERSION"
           else
@@ -52,7 +53,7 @@ jobs:
           fi
 
   build-android:
-    name: Build Android arm64-v8a Release
+    name: Build GEET Android Release
     runs-on: ubuntu-latest
     needs: get-version
     env:
@@ -93,6 +94,12 @@ jobs:
             "build-tools;37.0.0" \
             "cmake;4.1.2"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370" >> "$GITHUB_ENV"
+
+      - name: Install build and test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev ffmpeg
+          echo "MORNYE_TEST_FFMPEG=$(command -v ffmpeg)" >> "$GITHUB_ENV"
 
       - name: Activate pinned Rust toolchain
         working-directory: rust_backend
@@ -143,59 +150,44 @@ jobs:
       - name: Prepare Flutter framework patch
         run: dart scripts/prepare_flutter_sdk.dart
 
+      - name: Run verification checks
+        run: |
+          cd rust_backend && cargo check --workspace && cd ..
+          flutter analyze
+          flutter test
+
       - name: Generate app icons
         run: dart run flutter_launcher_icons
 
-      - name: Build release arm64-v8a APK
+      - name: Build release APK
         run: |
           export MORNYE_RUST_ANDROID_ABIS="arm64-v8a"
-          bash scripts/build_android.sh --target lib/main.dart
+          flutter build apk --release --target-platform android-arm64
           ls -la build/app/outputs/flutter-apk/
 
-      - name: Sign and verify arm64-v8a release APK
+      - name: Package and checksum GEET release APK
         env:
           VERSION: ${{ needs.get-version.outputs.version }}
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
           apk_dir="build/app/outputs/flutter-apk"
-          target_apk="$apk_dir/Mornye-${VERSION}-arm64.apk"
+          target_apk="$apk_dir/GEET-${VERSION}-arm64.apk"
 
-          if [ -n "${KEYSTORE_BASE64:-}" ]; then
-            umask 077
-            signing_dir="$(mktemp -d "$RUNNER_TEMP/mornye-signing.XXXXXX")"
-            trap 'rm -rf "$signing_dir"' EXIT
-            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$signing_dir/release.jks"
-            apksigner="$ANDROID_HOME/build-tools/37.0.0/apksigner"
-            export KEY_PASSWORD="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
-
-            "$apksigner" sign \
-              --ks "$signing_dir/release.jks" \
-              --ks-key-alias "$KEY_ALIAS" \
-              --ks-pass env:KEYSTORE_PASSWORD \
-              --key-pass env:KEY_PASSWORD \
-              --v1-signing-enabled true \
-              --v2-signing-enabled true \
-              --v3-signing-enabled true \
-              --v4-signing-enabled true \
-              --out "$target_apk" "$apk_dir/app-arm64-v8a-release.apk"
-          else
-            echo "Signing keystore not provided; packaging unsigned release artifact"
+          if [ -f "$apk_dir/app-release.apk" ]; then
+            cp "$apk_dir/app-release.apk" "$target_apk"
+          elif [ -f "$apk_dir/app-arm64-v8a-release.apk" ]; then
             cp "$apk_dir/app-arm64-v8a-release.apk" "$target_apk"
           fi
 
-          (cd "$apk_dir" && sha256sum Mornye-*.apk > SHA256SUMS.txt)
+          (cd "$apk_dir" && sha256sum GEET-*.apk > SHA256SUMS.txt)
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-arm64-apk
+          name: geet-android-arm64-apk
           if-no-files-found: error
           path: |
-            build/app/outputs/flutter-apk/Mornye-*.apk
+            build/app/outputs/flutter-apk/GEET-*.apk
             build/app/outputs/flutter-apk/SHA256SUMS.txt
 
   create-release:
@@ -212,19 +204,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download Android APK
+      - name: Download GEET Android APK
         uses: actions/download-artifact@v4
         with:
-          name: android-arm64-apk
+          name: geet-android-arm64-apk
           path: ./release
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.get-version.outputs.version }}
-          name: Release ${{ needs.get-version.outputs.version }}
+          name: GEET ${{ needs.get-version.outputs.version }}
           prerelease: ${{ needs.get-version.outputs.is_prerelease == 'true' }}
           files: |
-            ./release/Mornye-*.apk
+            ./release/GEET-*.apk
             ./release/SHA256SUMS.txt
           generate_release_notes: true

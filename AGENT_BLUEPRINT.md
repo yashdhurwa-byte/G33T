@@ -1,7 +1,7 @@
 # AGENT_BLUEPRINT.md
 
 ## Overview
-G33T (Mornye) is a high-performance, audiophile-grade mobile music utility built with Flutter and Rust for Android. This blueprint outlines the engineering stages for refining the application into a lean, offline-first local audio player with bit-perfect playback and distinct theme engines.
+GEET (formerly G33T/Mornye) is a high-performance, audiophile-grade mobile music utility built with Flutter and Rust for Android. This blueprint outlines the engineering stages for refining the application into a lean, offline-first local audio player with bit-perfect playback and distinct theme engines.
 
 ---
 
