@@ -74,3 +74,33 @@ G33T (Mornye) is a high-performance, audiophile-grade mobile music utility built
 ### Validation Criteria
 - `cargo check --workspace`: 0 errors, 0 warnings.
 - `flutter analyze`: 0 errors, 0 warnings.
+
+---
+
+## STAGE 3: Real-Time Audio Telemetry & Offline Playback Analytics
+
+### 1. Real-Time Audio & DAC Signal Telemetry
+- Extracts live stream parameters from the Rust decoder, Android audio, Oboe, and USB DAC bit-perfect pipelines:
+  - Codec & Format: FLAC, WAV, DSD, ALAC, Opus, MP3
+  - Bit depth: 16-bit, 24-bit, 32-bit float, 1-bit DSD
+  - Sample rate in kHz: 44.1 kHz, 48.0 kHz, 96.0 kHz, 192.0 kHz, 384.0 kHz, DSD64/128/256
+  - Instantaneous / average bitrate in kbps
+  - Active hardware output route: USB DAC (Bit-Perfect Direct), Oboe / AudioTrack Hi-Res, 3.5mm Headphone Jack, Internal Speaker, Bluetooth LDAC/aptX
+- Rendered in a clean, interactive, and toggleable technical telemetry HUD/pill on the Now Playing screen.
+
+### 2. Offline Playback Telemetry & Analytics Engine
+- Strictly local SQLite (`sqflite`) telemetry engine (`playback_telemetry.db`).
+- Logs verified play counts (>= 30s or >= 50% threshold), cumulative listening time, and completion ratios vs. early skips.
+- Tracks most-played tracks, albums, and directories/folders without any network calls.
+- Classifies audio quality distribution (Hi-Res 24-bit/96kHz+, CD 16-bit Lossless, Lossy).
+
+### 3. Telemetry Dashboard Screen
+- Dedicated Listening Telemetry & Analytics dashboard screen (`TelemetryDashboardScreen`).
+- Visual breakdowns of listening time, verified plays, completion-to-skip ratios, top tracks, top albums, top folders, and signal quality distribution.
+- Dynamically adapts to both:
+  - **Engine A (Mornye Engine):** AMOLED Pure Black (`#000000`), Electric Violet (`#8B5CF6`), Stark White (`#FFFFFF`).
+  - **Engine B (Material UI):** White background (`#FFFFFF`), Sakura Pink cards (`#FCE4EC`), Deep Royal Purple accents (`#6A1B9A`).
+
+### Validation Criteria
+- `cargo check --workspace`: 0 errors, 0 warnings.
+- `flutter analyze`: 0 errors, 0 warnings.

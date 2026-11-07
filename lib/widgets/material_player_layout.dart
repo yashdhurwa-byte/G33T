@@ -17,6 +17,7 @@ import 'package:mornye/widgets/player_metadata_title.dart';
 import 'package:mornye/widgets/playback_source_label.dart';
 import 'package:mornye/widgets/player_playback_controls.dart';
 import 'package:mornye/widgets/player_volume_control.dart';
+import 'package:mornye/widgets/audio_signal_telemetry_hud.dart';
 import 'package:mornye/widgets/turntable_platter.dart';
 
 class MaterialPlayerLayout extends StatelessWidget {
@@ -340,7 +341,15 @@ class MaterialPlayerLayout extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: compact ? 12 : 24),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: AudioSignalTelemetryHud(
+            mediaItem: mediaItem,
+            metadata: metadata,
+          ),
+        ),
+        SizedBox(height: compact ? 12 : 20),
       ],
       if (showControls) ...[
         PlayerPlaybackControls(

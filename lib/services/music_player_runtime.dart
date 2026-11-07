@@ -27,6 +27,7 @@ import 'package:mornye/services/library_database.dart';
 import 'package:mornye/services/listening_statistics.dart';
 import 'package:mornye/services/lastfm/lastfm_service.dart';
 import 'package:mornye/services/notification_lyrics_bridge.dart';
+import 'package:mornye/services/playback_telemetry_engine.dart';
 import 'package:mornye/services/media_kit_playback_deck.dart';
 import 'package:mornye/services/media_library_browser.dart';
 import 'package:mornye/services/media_session_art_cache.dart';
@@ -549,6 +550,7 @@ class MusicPlayerRuntime {
         handler.onSourceMetadataChanged,
       );
       NotificationLyricsBridge.instance.init(handler);
+      PlaybackTelemetryEngine.instance.init(this);
     }
     if (!_initializing && !identical(existing, handler)) _handlers.add(handler);
   }
@@ -556,6 +558,7 @@ class MusicPlayerRuntime {
   void detach(MusicPlayerHandler handler) {
     if (!identical(_handler, handler)) return;
     NotificationLyricsBridge.instance.dispose();
+    PlaybackTelemetryEngine.instance.dispose();
     _lastfm?.bind(null);
     _unsubscribeSourceDeletion?.call();
     _unsubscribeSourceDeletion = null;

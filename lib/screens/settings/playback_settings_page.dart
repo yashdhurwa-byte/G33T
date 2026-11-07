@@ -15,7 +15,7 @@ import 'package:mornye/services/playback_deck.dart';
 import 'package:mornye/services/music_player_service.dart'
     show resetAutoplayLearning;
 import 'package:mornye/services/song_analysis.dart';
-import 'package:mornye/screens/listening_statistics_screen.dart';
+import 'package:mornye/screens/telemetry_dashboard_screen.dart';
 import 'package:mornye/screens/equalizer_screen.dart';
 import 'package:mornye/theme/mornye_theme.dart';
 import 'package:mornye/utils/desktop_platform.dart';
@@ -633,7 +633,7 @@ class _PlaybackSettingsPageState extends ConsumerState<PlaybackSettingsPage>
                 title: context.l10n.listeningStats,
                 subtitle: context.l10n.listeningStatsDescription,
                 onTap: () => Navigator.of(context).push(
-                  slidePageRoute<void>(page: const ListeningStatisticsScreen()),
+                  slidePageRoute<void>(page: const TelemetryDashboardScreen()),
                 ),
                 showDivider: false,
               ),

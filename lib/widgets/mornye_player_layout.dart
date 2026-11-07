@@ -9,6 +9,7 @@ import 'package:mornye/providers/music_player_provider.dart';
 import 'package:mornye/providers/settings_provider.dart';
 import 'package:mornye/routes/now_playing_route.dart';
 import 'package:mornye/utils/playback_seek_preview.dart';
+import 'package:mornye/widgets/audio_signal_telemetry_hud.dart';
 import 'package:mornye/widgets/mornye_context_menu.dart';
 import 'package:mornye/widgets/mornye_landscape_player.dart';
 import 'package:mornye/widgets/mornye_player_favorite_button.dart';
@@ -552,6 +553,13 @@ class MornyePlayerLayout extends ConsumerWidget {
                         item: mediaItem,
                         color: colorScheme.onSurface.withValues(alpha: 0.72),
                       ),
+                      if (page == 0) ...[
+                        const SizedBox(height: 8),
+                        AudioSignalTelemetryHud(
+                          mediaItem: mediaItem,
+                          metadata: metadata,
+                        ),
+                      ],
                     ],
                   ),
                 ),
