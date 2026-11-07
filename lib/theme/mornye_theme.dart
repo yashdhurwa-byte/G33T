@@ -262,7 +262,7 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
     final scheme =
         ColorScheme.fromSeed(
           seedColor: accent,
-          brightness: Brightness.dark,
+          brightness: brightness,
         ).copyWith(
           primary: accent,
           onPrimary: warmSoftBeige,

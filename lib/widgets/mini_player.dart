@@ -57,27 +57,33 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
     ref.listenManual(
       currentMediaItemProvider.select((item) => item.value?.artUri),
       (_, artUri) {
+        if (!mounted) return;
         _warmCoverColour(artUri);
         _warmFullScreenArtwork(artUri);
       },
     );
     ref.listenManual(
       settingsProvider.select((settings) => settings.playerCoverStyle),
-      (_, _) => _warmFullScreenArtwork(
-        ref.read(currentMediaItemProvider).value?.artUri,
-      ),
+      (_, _) {
+        if (!mounted) return;
+        _warmFullScreenArtwork(
+          ref.read(currentMediaItemProvider).value?.artUri,
+        );
+      },
     );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!mounted) return;
     _warmCoverColour(ref.read(currentMediaItemProvider).value?.artUri);
     _warmFullScreenArtwork(ref.read(currentMediaItemProvider).value?.artUri);
   }
 
   void _warmFullScreenArtwork(Uri? artUri) {
-    if (context.isMornye ||
+    if (!mounted ||
+        context.isMornye ||
         isDesktopPlatform ||
         artUri == null ||
         ref.read(settingsProvider).playerCoverStyleFor(mornye: false) !=
@@ -99,7 +105,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
   // The Mornye full player shades itself from the cover's source colour;
   // resolving it with the track lets the player open on its final colour.
   void _warmCoverColour(Uri? artUri) {
-    if (!context.isMornye || artUri == _warmedArtUri) return;
+    if (!mounted || !context.isMornye || artUri == _warmedArtUri) return;
     _warmedArtUri = artUri;
     final source = artUri?.toString();
     if (source != null && source.isNotEmpty) {
