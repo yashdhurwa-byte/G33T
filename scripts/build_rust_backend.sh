@@ -86,7 +86,10 @@ case "$(uname -s)" in
     export MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-11.0}"
     ;;
   Linux) HOST_LIBRARY="$CARGO_TARGET_DIR/release/libmornye_mobile.so" ;;
-  *) echo "Error: use macOS or Linux for this build script." >&2; exit 1 ;;
+  MINGW*|MSYS*|CYGWIN*|Windows_NT)
+    HOST_LIBRARY="$CARGO_TARGET_DIR/release/mornye_mobile.dll"
+    ;;
+  *) echo "Error: use macOS, Linux, or Windows for this build script." >&2; exit 1 ;;
 esac
 
 # Build separately from bindgen so CLI and cargo-metadata features are not
@@ -107,11 +110,16 @@ if [[ "$PLATFORM" == "android" ]]; then
     exit 1
   fi
   case "$(uname -s)" in
-    Darwin) NDK_HOST="darwin-x86_64" ;;
-    Linux) NDK_HOST="linux-x86_64" ;;
+    Darwin) NDK_HOST="darwin-x86_64"; EXT="" ;;
+    Linux) NDK_HOST="linux-x86_64"; EXT="" ;;
+    MINGW*|MSYS*|CYGWIN*|Windows_NT) NDK_HOST="windows-x86_64"; EXT=".cmd" ;;
   esac
+  # Normalize backslashes for cross-platform toolchains
+  ANDROID_NDK_HOME="${ANDROID_NDK_HOME//\\//}"
   NDK_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$NDK_HOST/bin"
   NDK_SYSROOT="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$NDK_HOST/sysroot"
+  NDK_CLANG_INC="$(find "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$NDK_HOST/lib/clang" -maxdepth 2 -type d -name include 2>/dev/null | head -n 1)"
+  export LIBCLANG_PATH="$NDK_BIN"
 
   ANDROID_TARGETS=()
   ANDROID_LINKERS=()
@@ -119,28 +127,28 @@ if [[ "$PLATFORM" == "android" ]]; then
     case "$ABI" in
       arm64-v8a)
         ANDROID_TARGETS+=(aarch64-linux-android)
-        ANDROID_LINKERS+=("$NDK_BIN/aarch64-linux-android24-clang")
+        ANDROID_LINKERS+=("$NDK_BIN/aarch64-linux-android24-clang$EXT")
         # QuickJS is compiled C. Configure cc-rs and libclang for the same
         # target/API as Rust; the host SDK cannot supply Android headers or
         # ABI layouts.
-        export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$NDK_BIN/aarch64-linux-android24-clang"
+        export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$NDK_BIN/aarch64-linux-android24-clang$EXT"
         export CC_aarch64_linux_android="$CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER"
         export AR_aarch64_linux_android="$NDK_BIN/llvm-ar"
-        export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=\"$NDK_SYSROOT\" --target=aarch64-linux-android24"
+        export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=\"$NDK_SYSROOT\" --target=aarch64-linux-android24 ${NDK_CLANG_INC:+-isystem \"$NDK_CLANG_INC\"}"
         ;;
       armeabi-v7a)
         ANDROID_TARGETS+=(armv7-linux-androideabi)
-        ANDROID_LINKERS+=("$NDK_BIN/armv7a-linux-androideabi24-clang")
-        export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER="$NDK_BIN/armv7a-linux-androideabi24-clang"
+        ANDROID_LINKERS+=("$NDK_BIN/armv7a-linux-androideabi24-clang$EXT")
+        export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER="$NDK_BIN/armv7a-linux-androideabi24-clang$EXT"
         export CC_armv7_linux_androideabi="$CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER"
         export AR_armv7_linux_androideabi="$NDK_BIN/llvm-ar"
-        export BINDGEN_EXTRA_CLANG_ARGS_armv7_linux_androideabi="--sysroot=\"$NDK_SYSROOT\" --target=armv7a-linux-androideabi24"
+        export BINDGEN_EXTRA_CLANG_ARGS_armv7_linux_androideabi="--sysroot=\"$NDK_SYSROOT\" --target=armv7a-linux-androideabi24 ${NDK_CLANG_INC:+-isystem \"$NDK_CLANG_INC\"}"
         ;;
     esac
   done
 
   for linker in "${ANDROID_LINKERS[@]}"; do
-    if [[ ! -x "$linker" ]]; then
+    if [[ ! -f "$linker" && ! -x "$linker" ]]; then
       echo "Error: Android API 24 linker was not found: $linker" >&2
       exit 1
     fi
