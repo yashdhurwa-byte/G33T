@@ -11,6 +11,7 @@ import 'package:mornye/widgets/app_sliver_header.dart';
 import 'package:mornye/widgets/cached_cover_image.dart';
 import 'package:mornye/widgets/error_card.dart';
 import 'package:mornye/widgets/sliver_layout_info_builder.dart';
+import 'package:mornye/widgets/spatial_cover_flow.dart';
 
 /// Offline Album Grid Screen wired to sqflite + SAF and local custom cover cache.
 class AlbumGridScreen extends ConsumerStatefulWidget {
@@ -24,6 +25,7 @@ class _AlbumGridScreenState extends ConsumerState<AlbumGridScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _sort = 'a-z';
+  bool _isCoverFlow = false;
 
   @override
   void dispose() {
@@ -50,6 +52,13 @@ class _AlbumGridScreenState extends ConsumerState<AlbumGridScreen> {
           AppSliverHeader.page(
             title: context.l10n.searchAlbums,
             actions: [
+              IconButton(
+                icon: Icon(
+                  _isCoverFlow ? Icons.grid_view_rounded : Icons.view_carousel_rounded,
+                ),
+                tooltip: _isCoverFlow ? 'Grid View' : '3D Cover Flow',
+                onPressed: () => setState(() => _isCoverFlow = !_isCoverFlow),
+              ),
               PopupMenuButton<String>(
                 icon: const AppIcon(Icons.sort),
                 tooltip: context.l10n.searchSortTitle,
@@ -121,6 +130,45 @@ class _AlbumGridScreenState extends ConsumerState<AlbumGridScreen> {
                   child: EmptyState(
                     icon: Icons.album_outlined,
                     title: context.l10n.libraryEmptyCollection,
+                  ),
+                );
+              }
+
+              if (_isCoverFlow) {
+                final coverFlowItems = albums.map((album) {
+                  return CoverFlowItem(
+                    id: album.key,
+                    title: album.name,
+                    subtitle: album.artist,
+                    artUri: album.cover != null && album.cover!.isNotEmpty
+                        ? Uri.tryParse(album.cover!)
+                        : null,
+                    onTap: () {
+                      Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (_) => LocalAlbumScreen(
+                            albumName: album.name,
+                            artistName: album.artist,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(growable: false);
+
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: SpatialCoverFlow(
+                        items: coverFlowItems,
+                        height: 420,
+                        cardSize: 240,
+                        showReflection: true,
+                        showMetadata: true,
+                      ),
+                    ),
                   ),
                 );
               }

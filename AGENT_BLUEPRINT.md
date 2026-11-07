@@ -44,7 +44,6 @@ G33T (Mornye) is a high-performance, audiophile-grade mobile music utility built
 ### Validation Criteria
 - `cargo check`: 0 errors across the Rust workspace.
 - `flutter analyze`: 0 errors across the Flutter codebase.
-- Commit and push to repository upon passing all checks.
 
 ---
 
@@ -121,6 +120,32 @@ G33T (Mornye) is a high-performance, audiophile-grade mobile music utility built
 - Complete layout styling dynamically bound to the active engine:
   - **Engine A (Mornye Engine):** Pure AMOLED Black (`#000000`), Electric Violet (`#8B5CF6`) primary accents and active highlights, Stark White (`#FFFFFF`) typography and icons.
   - **Engine B (Google Material UI):** Crisp White (`#FFFFFF`) background, Sakura Pink (`#FCE4EC`) cards and pills, Deep Royal Purple (`#6A1B9A`) primary accents and typography, with `useDynamicColor: false`.
+
+### Validation Criteria
+- `cargo check --workspace`: 0 errors, 0 warnings.
+- `flutter analyze`: 0 errors, 0 warnings.
+
+---
+
+## STAGE 5: Spatial Vinyl UI Refactor & Final Verification
+
+### 1. Spatial Vinyl & Cover Flow Layout
+- **High-Fidelity Rotating Vinyl Platter (`TurntablePlatter`)**:
+  - Concentric microgroove CustomPainters with dual opposing light cones, beveled outer rim, run-out groove, center circular album-art clipping mask, and metallic spindle pin.
+  - Animated tonearm physics: dynamic tracking angle sweep responding to playback position ($0\% \to 100\%$), realistic needle drop damping with spring oscillation (`Curves.easeOutBack`), and spatial cast shadow onto the vinyl record.
+- **Cascading Cover Flow / 3D Album Selection Carousel (`SpatialCoverFlow`)**:
+  - Matrix4 3D perspective projection (`setEntry(3, 2, 0.0018)`), Y-axis rotation, Z-depth translation, and depth falloff.
+  - Realistic mirror floor reflection with gradient transparency mask.
+  - Integrated into both play queue browsing and local offline SAF album library browsing (`AlbumGridScreen`).
+- **Floating Glass Control Dock Pills (`FloatingGlassControlDock`)**:
+  - Real-time frosted glass blur via `BackdropFilter` (`sigmaX: 18, sigmaY: 18`).
+  - Houses interactive seekbars, complete tactile transport controls, volume control, and embedded live DAC telemetry badge.
+
+### 2. Backend & Engine Binding
+- Direct connection to the Rust FFI audio decoder and live telemetry streams.
+- Live responsiveness and dynamic synchronization across:
+  - **Theme Engine A (Mornye):** `#000000` AMOLED Black, `#8B5CF6` Electric Violet accents, `#FFFFFF` Stark White text/controls.
+  - **Theme Engine B (Google Material UI):** `#FFFFFF` background, `#FCE4EC` Sakura Pink glass cards/pills, `#6A1B9A` Deep Royal Purple accents, with `useDynamicColor: false`.
 
 ### Validation Criteria
 - `cargo check --workspace`: 0 errors, 0 warnings.

@@ -118,6 +118,14 @@ class _TurntablePlatterState extends ConsumerState<TurntablePlatter>
   @override
   Widget build(BuildContext context) {
     final isPlaying = ref.watch(playbackPlayingProvider);
+    final position = ref.watch(playbackPositionProvider);
+    final duration = widget.mediaItem.duration ?? Duration.zero;
+    final progress = duration.inMilliseconds > 0
+        ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+        : 0.0;
+    // Tonearm physics: rests outside platter when paused (-0.025 turns),
+    // and sweeps smoothly across the groove radius as track advances (0.024 + progress * 0.038)
+    final tonearmTurns = isPlaying ? (0.024 + progress * 0.038) : -0.025;
 
     // Keep ticker in sync with playback state
     if (isPlaying && !_ticker.isActive) {
@@ -233,15 +241,15 @@ class _TurntablePlatterState extends ConsumerState<TurntablePlatter>
                     ),
                   ),
 
-                  // Tonearm overlay (optional, rests on record when playing)
+                  // Spatial tonearm with dynamic tracking angle and needle drop physics
                   if (widget.showTonearm)
                     Positioned(
                       top: 4,
                       right: 12,
                       child: AnimatedRotation(
-                        turns: isPlaying ? 0.04 : 0.0,
-                        duration: const Duration(milliseconds: 400),
-                        curve: Curves.easeInOutCubic,
+                        turns: tonearmTurns,
+                        duration: const Duration(milliseconds: 500),
+                        curve: isPlaying ? Curves.easeOutBack : Curves.easeInOutCubic,
                         alignment: Alignment.topRight,
                         child: _TonearmWidget(accentColor: widget.accentColor),
                       ),
@@ -357,34 +365,75 @@ class _TonearmPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Pivot base
     final pivotCenter = Offset(size.width - 16, 16);
-    final pivotPaint = Paint()..color = const Color(0xFF52525B);
-    canvas.drawCircle(pivotCenter, 10, pivotPaint);
 
-    final pivotInner = Paint()..color = const Color(0xFFA1A1AA);
-    canvas.drawCircle(pivotCenter, 5, pivotInner);
+    // 0. Spatial drop shadow of the tonearm cast onto the vinyl platter
+    final shadowArmPath = Path()
+      ..moveTo(pivotCenter.dx + 4, pivotCenter.dy + 6)
+      ..quadraticBezierTo(size.width - 16, size.height * 0.55 + 6, 16, size.height - 8);
+    final shadowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round
+      ..color = Colors.black.withValues(alpha: 0.35)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    canvas.drawPath(shadowArmPath, shadowPaint);
 
-    // Arm line
+    // 1. Pivot Gimbal Base & Counterweight
+    final pivotBasePaint = Paint()..color = const Color(0xFF27272A);
+    canvas.drawCircle(pivotCenter, 13, pivotBasePaint);
+
+    final pivotBezelPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..color = const Color(0xFF71717A);
+    canvas.drawCircle(pivotCenter, 13, pivotBezelPaint);
+
+    // Counterweight stub behind pivot
+    final counterweightRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: Offset(pivotCenter.dx + 6, pivotCenter.dy - 6), width: 10, height: 12),
+      const Radius.circular(2),
+    );
+    final counterweightPaint = Paint()..color = const Color(0xFFA1A1AA);
+    canvas.drawRRect(counterweightRect, counterweightPaint);
+
+    final pivotCenterPaint = Paint()..color = const Color(0xFFE4E4E7);
+    canvas.drawCircle(pivotCenter, 5, pivotCenterPaint);
+
+    // 2. Main S-curved tonearm tube
     final armPath = Path()
       ..moveTo(pivotCenter.dx, pivotCenter.dy)
       ..quadraticBezierTo(size.width - 20, size.height * 0.55, 12, size.height - 14);
 
     final armPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
+      ..strokeWidth = 3.2
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFFD4D4D8);
+      ..color = const Color(0xFFE4E4E7);
 
     canvas.drawPath(armPath, armPaint);
 
-    // Headshell / Cartridge at tip
-    final cartridgePaint = Paint()..color = accentColor ?? const Color(0xFF8B5CF6);
+    // 3. Headshell / Cartridge at tip
+    final cartridgeAccent = accentColor ?? const Color(0xFF8B5CF6);
+    final cartridgePaint = Paint()..color = cartridgeAccent;
     final cartridgeRect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: const Offset(12, 98), width: 10, height: 16),
       const Radius.circular(2),
     );
     canvas.drawRRect(cartridgeRect, cartridgePaint);
+
+    // Metallic finger lift hook on headshell
+    final fingerLiftPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = const Color(0xFFD4D4D8);
+    canvas.drawLine(const Offset(7, 94), const Offset(3, 91), fingerLiftPaint);
+
+    // Stylus jewel dot at needle contact point
+    final stylusPaint = Paint()
+      ..color = Colors.white
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1);
+    canvas.drawCircle(const Offset(12, 105), 1.2, stylusPaint);
   }
 
   @override

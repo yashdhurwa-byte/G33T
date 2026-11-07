@@ -56,6 +56,8 @@ import 'package:mornye/widgets/mornye_player_artwork.dart';
 import 'package:mornye/providers/player_motion_artwork_provider.dart';
 import 'package:mornye/services/app_orientation.dart';
 import 'package:mornye/widgets/desktop/dopamine_desktop_player.dart';
+import 'package:mornye/widgets/spatial_cover_flow.dart';
+import 'package:mornye/widgets/floating_glass_control_dock.dart';
 
 export 'package:mornye/routes/now_playing_route.dart';
 
@@ -231,6 +233,85 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     } else {
       await setAppOrientation(playerVisible: true);
     }
+  }
+
+  void _showCoverFlowSheet() {
+    final mediaItem = ref.read(currentMediaItemProvider).value;
+    if (mediaItem == null) return;
+    final mornye = context.isMornye;
+    final queue = ref.read(playQueueProvider).value ?? [mediaItem];
+    final currentIndex = ref.read(currentQueueIndexProvider);
+    final items = queue.map((track) {
+      return CoverFlowItem.fromMediaItem(
+        track,
+        onTap: () {
+          final index = queue.indexOf(track);
+          if (index >= 0) {
+            ref.read(musicPlayerControllerProvider).jumpTo(index);
+          }
+        },
+      );
+    }).toList();
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: mornye ? const Color(0xFF0A0A0E) : Colors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: mornye ? Colors.white24 : Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '3D COVER FLOW QUEUE',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                  color: mornye ? const Color(0xFF8B5CF6) : const Color(0xFF6A1B9A),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SpatialCoverFlow(
+                items: items,
+                initialIndex: currentIndex >= 0 && currentIndex < items.length ? currentIndex : 0,
+                height: 380,
+                cardSize: 220,
+                showReflection: true,
+                showMetadata: true,
+                onItemChanged: (index) {
+                  if (index >= 0 && index < queue.length) {
+                    ref.read(musicPlayerControllerProvider).jumpTo(index);
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              FloatingGlassControlDock(
+                mediaItem: mediaItem,
+                metadata: _trackMetadata,
+                seekPreview: _seekPreview,
+                showTelemetry: true,
+                showVolume: false,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _onInspectorChanged() {
@@ -564,6 +645,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           actions: mornye
               ? [
                   IconButton(
+                    tooltip: '3D Cover Flow',
+                    color: Colors.white,
+                    icon: const Icon(CupertinoIcons.square_stack_3d_down_right, size: 20),
+                    onPressed: _showCoverFlowSheet,
+                  ),
+                  IconButton(
                     tooltip: 'Full-Screen Desktop Mode',
                     color: Colors.white,
                     icon: const Icon(CupertinoIcons.desktopcomputer, size: 20),
@@ -571,6 +658,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   ),
                 ]
               : [
+                  AppIconButton(
+                    tooltip: '3D Cover Flow',
+                    color: overCover ? Colors.white : null,
+                    icon: const AppIcon(Icons.view_carousel_rounded),
+                    onPressed: _showCoverFlowSheet,
+                  ),
                   AppIconButton(
                     tooltip: 'Full-Screen Desktop Mode',
                     color: overCover ? Colors.white : null,

@@ -18,7 +18,6 @@ import 'package:mornye/theme/mornye_theme.dart';
 import 'package:mornye/utils/lyrics_parser.dart';
 import 'package:mornye/utils/playback_seek_preview.dart';
 import 'package:mornye/widgets/audio_output_button.dart';
-import 'package:mornye/widgets/audio_signal_telemetry_hud.dart';
 import 'package:mornye/widgets/desktop/desktop_inspector.dart';
 import 'package:mornye/widgets/lyrics_options_button.dart';
 import 'package:mornye/widgets/mornye_context_menu.dart';
@@ -29,12 +28,13 @@ import 'package:mornye/widgets/mornye_player_queue.dart';
 import 'package:mornye/widgets/no_scrollbars.dart';
 import 'package:mornye/widgets/player_details_sheet.dart';
 import 'package:mornye/widgets/player_lyrics_section.dart';
-import 'package:mornye/widgets/player_playback_controls.dart';
-import 'package:mornye/widgets/player_volume_control.dart';
 import 'package:mornye/widgets/playlist_picker_sheet.dart';
 import 'package:mornye/widgets/turntable_platter.dart';
+import 'package:mornye/widgets/spatial_cover_flow.dart';
+import 'package:mornye/widgets/floating_glass_control_dock.dart';
 
 enum DopamineDesktopPanel { lyrics, queue }
+enum VisualStageMode { vinyl, coverFlow }
 
 /// Immersive Full-Screen Landscape Desktop Mode Player View inspired by Dopamine.
 ///
@@ -70,6 +70,7 @@ class DopamineDesktopPlayer extends ConsumerStatefulWidget {
 
 class _DopamineDesktopPlayerState extends ConsumerState<DopamineDesktopPlayer> {
   DopamineDesktopPanel _currentPanel = DopamineDesktopPanel.lyrics;
+  VisualStageMode _stageMode = VisualStageMode.vinyl;
 
   void _shareLyrics(LyricLine? line) {
     if (!mounted) return;
@@ -265,6 +266,25 @@ class _DopamineDesktopPlayerState extends ConsumerState<DopamineDesktopPlayer> {
 
           const SizedBox(width: 8),
 
+          // Vinyl Platter vs 3D Cover Flow Toggle
+          _RoundIconButton(
+            tooltip: _stageMode == VisualStageMode.vinyl
+                ? 'Switch to 3D Cover Flow'
+                : 'Switch to Vinyl Platter',
+            icon: _stageMode == VisualStageMode.vinyl
+                ? Icons.view_carousel_rounded
+                : Icons.album_rounded,
+            mornye: mornye,
+            accentColor: primaryAccent,
+            onPressed: () => setState(() {
+              _stageMode = _stageMode == VisualStageMode.vinyl
+                  ? VisualStageMode.coverFlow
+                  : VisualStageMode.vinyl;
+            }),
+          ),
+
+          const SizedBox(width: 8),
+
           // Equalizer Shortcut
           _RoundIconButton(
             tooltip: context.l10n.equalizerTitle,
@@ -331,7 +351,7 @@ class _DopamineDesktopPlayerState extends ConsumerState<DopamineDesktopPlayer> {
     );
   }
 
-  /// Left Pane Console: Platter, Live Telemetry HUD, Metadata, Seekbar, Controls
+  /// Left Pane Console: Spatial Vinyl Platter / 3D Cover Flow & Floating Glass Control Dock
   Widget _buildLeftConsole(
     BuildContext context,
     BoxConstraints constraints, {
@@ -356,29 +376,32 @@ class _DopamineDesktopPlayerState extends ConsumerState<DopamineDesktopPlayer> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 1. Digital Spinning Vinyl Platter
-          Center(
-            child: TurntablePlatter(
-              mediaItem: widget.mediaItem,
-              size: platterSize,
-              showTonearm: true,
-              accentColor: primaryAccent,
-            ),
+          // 1. Spatial Stage: High-Fidelity Vinyl Platter OR 3D Cover Flow Carousel
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 320),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: _stageMode == VisualStageMode.vinyl
+                ? Center(
+                    key: const ValueKey('stage-vinyl-platter'),
+                    child: TurntablePlatter(
+                      mediaItem: widget.mediaItem,
+                      size: platterSize,
+                      showTonearm: true,
+                      accentColor: primaryAccent,
+                    ),
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey('stage-coverflow-carousel'),
+                    child: _buildCoverFlowStage(context, platterSize),
+                  ),
           ),
 
           const SizedBox(height: 12),
 
-          // 2. Real-Time Audio & DAC Telemetry HUD Pill
-          AudioSignalTelemetryHud(
-            mediaItem: widget.mediaItem,
-            metadata: widget.metadata,
-          ),
-
-          const SizedBox(height: 14),
-
-          // 3. Track Metadata (Title, Artist, Album, Actions)
+          // 2. Track Metadata (Title, Artist, Album, Actions)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 Expanded(
@@ -432,44 +455,50 @@ class _DopamineDesktopPlayerState extends ConsumerState<DopamineDesktopPlayer> {
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
-          // 4. Playback Controls (Seekbar + Complete Transport)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: PlayerPlaybackControls(
-              mediaId: widget.mediaItem.id,
-              duration: widget.mediaItem.duration ?? Duration.zero,
-              seekPreview: widget.seekPreview,
-              colorScheme: colorScheme,
-              metadata: widget.metadata,
-              compact: true,
-              showPlaybackModes: true,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // 5. Volume Control Slider Capsule
-          Container(
-            width: 240,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            decoration: BoxDecoration(
-              color: mornye
-                  ? const Color(0xFF141418)
-                  : const Color(0xFFFCE4EC),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: primaryAccent.withValues(alpha: 0.15),
-                width: 1.0,
-              ),
-            ),
-            child: PlayerVolumeControl(
-              foreground: titleColor,
-            ),
+          // 3. Floating Glass Control Dock (housing seekbar, transport, volume, and live DAC telemetry badge)
+          FloatingGlassControlDock(
+            mediaItem: widget.mediaItem,
+            metadata: widget.metadata,
+            seekPreview: widget.seekPreview,
+            showTelemetry: true,
+            showVolume: true,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           ),
         ],
       ),
+    );
+  }
+
+  /// 3D Cover Flow Stage powered by queue tracks
+  Widget _buildCoverFlowStage(BuildContext context, double size) {
+    final queue = ref.watch(playQueueProvider).value ?? [widget.mediaItem];
+    final currentIndex = ref.watch(currentQueueIndexProvider);
+    final items = queue.map((track) {
+      return CoverFlowItem.fromMediaItem(
+        track,
+        onTap: () {
+          final index = queue.indexOf(track);
+          if (index >= 0) {
+            ref.read(musicPlayerControllerProvider).jumpTo(index);
+          }
+        },
+      );
+    }).toList();
+
+    return SpatialCoverFlow(
+      items: items,
+      initialIndex: currentIndex >= 0 && currentIndex < items.length ? currentIndex : 0,
+      height: size + 40,
+      cardSize: size * 0.70,
+      showReflection: true,
+      showMetadata: false,
+      onItemChanged: (index) {
+        if (index >= 0 && index < queue.length) {
+          ref.read(musicPlayerControllerProvider).jumpTo(index);
+        }
+      },
     );
   }
 
