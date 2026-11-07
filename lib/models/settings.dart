@@ -355,7 +355,7 @@ class AppSettings {
     this.separateSingles = false,
     this.singleFilenameFormat = '{title} - {artist}',
     this.albumFolderStructure = 'artist_album',
-    this.showExtensionStore = true,
+    this.showExtensionStore = false,
     this.heroAnimationsEnabled = true,
     this.forceBackdropBlur = false,
     this.extensionVerificationBrowserMode = 'in_app_first',

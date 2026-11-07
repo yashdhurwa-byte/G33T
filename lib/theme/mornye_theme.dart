@@ -69,6 +69,10 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
   // iOS dark systemRed: accent text stays readable on #1C1C1E cells.
   static const darkAccent = Color.fromRGBO(255, 69, 58, 1);
 
+  static const Color pureBlack = Color(0xFF000000);
+  static const Color electricViolet = Color(0xFF8B5CF6);
+  static const Color starkWhite = Color(0xFFFFFFFF);
+
   static Color accentColor(MornyeAccent accent, Brightness brightness) {
     final dark = brightness == Brightness.dark;
     final color = switch (accent) {
@@ -80,7 +84,10 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
       MornyeAccent.green => CupertinoColors.systemGreen,
       MornyeAccent.teal => CupertinoColors.systemTeal,
       MornyeAccent.blue => CupertinoColors.systemBlue,
-      MornyeAccent.purple => CupertinoColors.systemPurple,
+      MornyeAccent.purple => const CupertinoDynamicColor.withBrightness(
+        color: electricViolet,
+        darkColor: electricViolet,
+      ),
       MornyeAccent.pink => CupertinoColors.systemPink,
     };
     // Accents also label links and small controls on white surfaces.
@@ -245,41 +252,35 @@ class MornyeTheme extends ThemeExtension<MornyeTheme> {
     required bool useSystemFont,
     String? fontFamily,
   }) {
-    final dark = brightness == Brightness.dark;
-    final accent = accentColor(selectedAccent, brightness);
-    final foreground = dark ? Colors.white : Colors.black;
-    final surface = dark ? Colors.black : Colors.white;
-    final grouped = dark ? const Color(0xff1c1c1e) : const Color(0xfff2f2f7);
-    final secondary = dark ? const Color(0xff98989f) : const Color(0xff6c6c70);
+    // Engine A (Mornye Engine: pure black #000000, electric violet #8B5CF6, stark white #FFFFFF)
+    final accent = electricViolet;
+    final foreground = starkWhite;
+    final surface = pureBlack;
+    final grouped = pureBlack;
+    final secondary = const Color(0xff98989f);
     final scheme =
         ColorScheme.fromSeed(
           seedColor: accent,
-          brightness: brightness,
+          brightness: Brightness.dark,
         ).copyWith(
           primary: accent,
-          onPrimary: accent.computeLuminance() < 0.179
-              ? Colors.white
-              : Colors.black,
-          primaryContainer: grouped,
+          onPrimary: starkWhite,
+          primaryContainer: pureBlack,
           onPrimaryContainer: accent,
           secondary: accent,
-          onSecondary: Colors.white,
-          secondaryContainer: grouped,
+          onSecondary: starkWhite,
+          secondaryContainer: pureBlack,
           onSecondaryContainer: foreground,
           surface: surface,
           onSurface: foreground,
           surfaceContainerLowest: surface,
-          surfaceContainerLow: grouped,
-          surfaceContainer: grouped,
-          surfaceContainerHigh: dark ? const Color(0xff2c2c2e) : grouped,
-          surfaceContainerHighest: dark
-              ? const Color(0xff3a3a3c)
-              : const Color(0xffe5e5ea),
+          surfaceContainerLow: pureBlack,
+          surfaceContainer: pureBlack,
+          surfaceContainerHigh: pureBlack,
+          surfaceContainerHighest: const Color(0xff18181b),
           onSurfaceVariant: secondary,
           outline: secondary,
-          outlineVariant: dark
-              ? const Color(0xff38383a)
-              : const Color(0xffc6c6c8),
+          outlineVariant: const Color(0xff27272a),
           surfaceTint: Colors.transparent,
         );
     // Cupertino's font proxies resolve to SF on Apple and the platform fallback

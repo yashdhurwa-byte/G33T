@@ -61,7 +61,7 @@ AppThemeStyle themeStyleFromString(String? value) => AppThemeStyle.values
     .firstWhere((style) => style.name == value, orElse: defaultAppThemeStyle);
 
 /// Fallback seed when dynamic color and a custom seed are unavailable.
-const int kDefaultSeedColor = 0xFF1DB954;
+const int kDefaultSeedColor = 0xFF6A1B9A;
 
 class ThemeSettings {
   final ThemeMode themeMode;
@@ -81,11 +81,11 @@ class ThemeSettings {
 
   const ThemeSettings({
     this.themeMode = ThemeMode.system,
-    this.useDynamicColor = true,
+    this.useDynamicColor = false,
     this.seedColorValue = kDefaultSeedColor,
     this.useAmoled = false,
-    this.style = AppThemeStyle.material,
-    this.mornyeAccent = MornyeAccent.blue,
+    this.style = AppThemeStyle.mornye,
+    this.mornyeAccent = MornyeAccent.purple,
     this.useSystemFont = false,
     this.customFontId = '',
     this.customFontName = '',

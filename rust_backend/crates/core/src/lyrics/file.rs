@@ -79,3 +79,37 @@ fn looks_like_lyrics(text: &str) -> bool {
         || lower.contains("[ti:")
         || (text.contains('\n') && text.contains('[') && text.contains(']'))
 }
+
+/// Offline Vorbis comment lyrics exporter to a .lrc file.
+pub fn export_vorbis_to_lrc(
+    audio_path: &str,
+    output_path: Option<&str>,
+    check: &dyn Fn() -> Result<(), String>,
+) -> Result<(String, String), String> {
+    check()?;
+    let mut file = std::fs::File::open(audio_path).map_err(|e| format!("open audio file: {e}"))?;
+    let suffix = audio_path.rfind('.').filter(|idx| !audio_path[*idx..].contains('/'));
+    let format = suffix.map_or_else(String::new, |idx| audio_path[idx + 1..].to_ascii_lowercase());
+    let metadata = crate::tags::read_audio_tags(&mut file, &format, check)
+        .map_err(|e| format!("read audio tags: {e}"))?;
+    check()?;
+    let lyrics_text = if !metadata.lyrics.trim().is_empty() {
+        metadata.lyrics
+    } else if looks_like_lyrics(&metadata.comment) {
+        metadata.comment
+    } else {
+        return Err("no Vorbis lyrics found in audio tags".into());
+    };
+
+    let target_path = match output_path {
+        Some(p) if !p.trim().is_empty() => p.to_string(),
+        _ => {
+            let base = &audio_path[..suffix.unwrap_or(audio_path.len())];
+            format!("{base}.lrc")
+        }
+    };
+
+    std::fs::write(&target_path, lyrics_text.as_bytes())
+        .map_err(|e| format!("write lrc file: {e}"))?;
+    Ok((target_path, lyrics_text))
+}

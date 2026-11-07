@@ -11,6 +11,7 @@ mod separators;
 mod write;
 use crate::text::utf8;
 pub(crate) use containers::{ogg_packets, ogg_stream_is_opus};
+pub use containers::extract_metadata_block_picture;
 pub use file::{file_metadata_extension, read_file_metadata};
 pub(crate) use id3::v2_tag_length;
 pub use library::{

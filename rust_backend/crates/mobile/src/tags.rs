@@ -318,6 +318,42 @@ pub fn read_file_metadata(
     serde_json::to_string(&metadata).map_err(|error| error.to_string().into())
 }
 
+#[derive(uniffi::Record)]
+pub struct PictureBlockArt {
+    pub mime: String,
+    pub data: Vec<u8>,
+}
+
+#[uniffi::export]
+pub fn extract_metadata_block_picture(data: Vec<u8>) -> Result<PictureBlockArt, AudioTagsError> {
+    let cover = mornye_core::tags::extract_metadata_block_picture(&data)
+        .map_err(|e| AudioTagsError::Read { message: e })?;
+    Ok(PictureBlockArt {
+        mime: cover.mime,
+        data: cover.data,
+    })
+}
+
+#[derive(uniffi::Record)]
+pub struct VorbisLrcExportResult {
+    pub lrc_path: String,
+    pub lyrics: String,
+}
+
+#[uniffi::export]
+pub fn export_vorbis_lyrics_to_lrc(
+    audio_path: String,
+    output_lrc_path: Option<String>,
+) -> Result<VorbisLrcExportResult, AudioTagsError> {
+    let (lrc_path, lyrics) = mornye_core::lyrics::file::export_vorbis_to_lrc(
+        &audio_path,
+        output_lrc_path.as_deref(),
+        &|| Ok(()),
+    )
+    .map_err(|e| AudioTagsError::Read { message: e })?;
+    Ok(VorbisLrcExportResult { lrc_path, lyrics })
+}
+
 pub(crate) fn check_lease(lease: Option<&RequestLease>) -> Result<(), String> {
     lease.map_or(Ok(()), |lease| {
         lease

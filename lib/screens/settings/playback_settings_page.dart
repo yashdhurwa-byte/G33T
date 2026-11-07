@@ -31,7 +31,6 @@ import 'package:mornye/widgets/app_sliver_header.dart';
 import 'package:mornye/widgets/beta_badge.dart';
 import 'package:mornye/widgets/player_volume_control.dart';
 import 'package:mornye/widgets/settings_group.dart';
-import 'package:mornye/widgets/discord_presence_settings.dart';
 import 'package:mornye/widgets/lastfm_settings.dart';
 import 'package:mornye/widgets/automix_settings.dart';
 import 'package:mornye/widgets/music_haptics_settings.dart';
@@ -455,12 +454,7 @@ class _PlaybackSettingsPageState extends ConsumerState<PlaybackSettingsPage>
               ),
             ],
           ),
-          if (Platform.isAndroid || Platform.isIOS || isDesktopPlatform) ...[
-            const SliverToBoxAdapter(
-              child: SettingsSectionHeader(title: 'Discord'),
-            ),
-            const SliverToBoxAdapter(child: DiscordPresenceSettings()),
-          ],
+
           if (isDesktopPlatform) ...[
             const SliverToBoxAdapter(
               child: SettingsSectionHeader(title: 'Last.fm'),

@@ -13,9 +13,6 @@ import 'package:mornye/providers/settings_provider.dart';
 import 'package:mornye/providers/equalizer_provider.dart';
 import 'package:mornye/services/app_navigation_service.dart';
 import 'package:mornye/services/app_orientation.dart';
-import 'package:mornye/services/link/client/link_client_controller.dart';
-import 'package:mornye/services/link/features/link_phone_features.dart';
-import 'package:mornye/services/link/sync/link_sync_runner.dart';
 import 'package:mornye/theme/dynamic_color_wrapper.dart';
 import 'package:mornye/l10n/app_localizations.dart';
 import 'package:mornye/l10n/supported_locales.dart';
@@ -26,7 +23,6 @@ import 'package:mornye/widgets/android_keyboard_lifecycle.dart';
 import 'package:mornye/widgets/app_snack_bar.dart';
 import 'package:mornye/widgets/desktop/desktop_shortcuts.dart';
 import 'package:mornye/widgets/desktop/library_drop_target.dart';
-import 'package:mornye/widgets/link/link_actions.dart';
 import 'package:mornye/widgets/mornye_glass_preparation.dart';
 import 'package:mornye/widgets/playback_feedback.dart';
 import 'package:mornye/widgets/tv_navigation.dart';
@@ -258,14 +254,6 @@ class MornyeApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Keeps the equalizer loaded for the app's lifetime without rebuilding.
     ref.listen(equalizerProvider, (_, _) {});
-    // On phones, keeps the link to a paired computer, its sync and the
-    // remote control features running.
-    if (ref.read(linkClientSupportedProvider)) {
-      ref.listen(linkClientControllerProvider, (_, _) {});
-      ref.listen(linkSyncRunnerProvider, (_, _) {});
-      ref.listen(linkPhoneFeaturesProvider, (_, _) {});
-      ref.listen(linkTransferOfferNoticesProvider, (_, _) {});
-    }
     final router = ref.watch(_routerProvider);
     final localeString = ref.watch(settingsProvider.select((s) => s.locale));
     final heroAnimationsEnabled = ref.watch(

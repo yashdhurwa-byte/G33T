@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:dart_smb2/dart_smb2.dart';
+import 'package:mornye/services/smb_types.dart';
 import 'package:synchronized/synchronized.dart';
 
 /// The calls a [NetworkSmbClient] makes on a connected share: an [Smb2Pool]
@@ -417,79 +417,6 @@ class _SmbSession {
   Future<void>? closing;
 }
 
-Future<NetworkSmbShare> _connectPool(NetworkSmbLogin login) async => _PoolShare(
-  await Smb2Pool.connect(
-    host: login.host,
-    share: login.share,
-    user: login.username,
-    password: login.password,
-    domain: login.domain,
-    workers: 1,
-    timeout: login.timeout,
-    version: Smb2Version.any,
-  ),
-);
-
-final class _PoolShare implements NetworkSmbShare {
-  _PoolShare(this._pool);
-
-  final Smb2Pool _pool;
-
-  @override
-  Future<List<Smb2DirEntry>> listDirectory(String path) =>
-      _pool.listDirectory(path);
-
-  @override
-  Future<Smb2Stat> stat(String path) => _pool.stat(path);
-
-  @override
-  Future<void> mkdir(String path) => _pool.mkdir(path);
-
-  @override
-  Future<bool> exists(String path) => _pool.exists(path);
-
-  @override
-  Future<void> deleteFile(String path) => _pool.deleteFile(path);
-
-  @override
-  Future<void> rename(String from, String to) => _pool.rename(from, to);
-
-  @override
-  Future<Object> openFile(String path) => _pool.openFile(path);
-
-  @override
-  Future<(Object, int)> openFileWithSize(String path) =>
-      _pool.openFileWithSize(path);
-
-  @override
-  Future<Object> openFileWrite(String path) => _pool.openFileWrite(path);
-
-  @override
-  Future<Uint8List> readFromHandle(
-    Object handle, {
-    required int offset,
-    required int length,
-  }) => _pool.readFromHandle(
-    handle as Smb2PoolHandle,
-    offset: offset,
-    length: length,
-  );
-
-  @override
-  Future<void> writeToHandle(
-    Object handle,
-    Uint8List data, {
-    required int offset,
-  }) => _pool.writeToHandle(handle as Smb2PoolHandle, data, offset: offset);
-
-  @override
-  Future<void> fsyncHandle(Object handle) =>
-      _pool.fsyncHandle(handle as Smb2PoolHandle);
-
-  @override
-  Future<void> closeHandle(Object handle) =>
-      _pool.closeHandle(handle as Smb2PoolHandle);
-
-  @override
-  Future<void> disconnect() => _pool.disconnect();
+Future<NetworkSmbShare> _connectPool(NetworkSmbLogin login) async {
+  throw UnsupportedError('SMB protocol stripped for offline build');
 }

@@ -142,6 +142,29 @@ fn picture_block(data: &[u8], ogg_limits: bool) -> Option<(u32, CoverArt)> {
     parse().ok()
 }
 
+pub fn extract_metadata_block_picture(data: &[u8]) -> Result<CoverArt, String> {
+    if data.is_empty() {
+        return Err("empty picture block".into());
+    }
+    if let Some((_, cover)) = picture_block(data, false) {
+        return Ok(cover);
+    }
+    use base64::Engine;
+    let filtered: Vec<u8> = data
+        .iter()
+        .copied()
+        .filter(|b| !b.is_ascii_whitespace())
+        .collect();
+    let decoded = base64::engine::general_purpose::STANDARD
+        .decode(&filtered)
+        .or_else(|_| base64::engine::general_purpose::STANDARD_NO_PAD.decode(&filtered))
+        .map_err(|e| format!("invalid base64 in picture block: {e}"))?;
+    if let Some((_, cover)) = picture_block(&decoded, false) {
+        return Ok(cover);
+    }
+    Err("failed to parse METADATA_BLOCK_PICTURE data".into())
+}
+
 fn valid_comments(data: &[u8]) -> bool {
     let Some(vendor) = data.get(..4) else {
         return false;

@@ -1472,6 +1472,26 @@ class PlatformBridge {
     });
   }
 
+  /// Extracts raw image data from a METADATA_BLOCK_PICTURE byte payload.
+  static Future<Map<String, dynamic>?> extractMetadataBlockPicture(
+    Uint8List rawBytes,
+  ) async {
+    return _invokeMap('extractMetadataBlockPicture', {
+      'data': rawBytes,
+    });
+  }
+
+  /// Exports embedded Vorbis lyrics to a .lrc sidecar file offline.
+  static Future<Map<String, dynamic>> exportVorbisLyricsToLrc(
+    String audioPath, {
+    String? outputPath,
+  }) async {
+    return _invokeMap('exportVorbisLyricsToLrc', {
+      'audio_path': audioPath,
+      'output_path': outputPath ?? '',
+    });
+  }
+
   static Future<Map<String, dynamic>> fetchAndSaveLyrics({
     required String trackName,
     required String artistName,

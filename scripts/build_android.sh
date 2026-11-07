@@ -22,19 +22,10 @@ for argument in "$@"; do
 done
 
 if [[ "$PRODUCTION_BUILD" == "1" ]]; then
-  if [[ "$LITE_BUILD" == "1" ]]; then
-    echo "Error: production builds require Discord; --production cannot be combined with --lite." >&2
-    exit 1
-  fi
-  export MORNYE_DISCORD_SDK=1
+  export MORNYE_DISCORD_SDK=0
 fi
 
-case "${MORNYE_DISCORD_SDK:-1}" in
-  0|1) ;;
-  *) echo "Error: MORNYE_DISCORD_SDK must be 0 (Lite) or 1 (full)." >&2; exit 1 ;;
-esac
-
-ANDROID_ABIS_RAW="${MORNYE_RUST_ANDROID_ABIS-arm64-v8a,armeabi-v7a}"
+ANDROID_ABIS_RAW="${MORNYE_RUST_ANDROID_ABIS-arm64-v8a}"
 case "$ANDROID_ABIS_RAW" in
   arm64-v8a|armeabi-v7a|arm64-v8a,armeabi-v7a|armeabi-v7a,arm64-v8a) ;;
   *)
@@ -53,26 +44,7 @@ for abi in "${ANDROID_ABIS[@]}"; do
 done
 TARGET_PLATFORM_LIST="$(IFS=','; echo "${TARGET_PLATFORMS[*]}")"
 
-if [[ "$PRODUCTION_BUILD" == "1" ]]; then
-  SDK_ROOT="$PROJECT_DIR/third_party/mornye_discord/sdk"
-  for sdk_file in discord_partner_sdk.aar notices/Discord-License-Notices.txt android/prefab/modules/discord_partner_sdk/include/discordpp.h; do
-    if [[ ! -f "$SDK_ROOT/$sdk_file" ]]; then
-      echo "Error: production requires the staged Discord SDK ($sdk_file). Run scripts/setup_discord_sdk.sh with the official SDK first." >&2
-      exit 1
-    fi
-  done
-  for abi in "${ANDROID_ABIS[@]}"; do
-    if [[ ! -f "$SDK_ROOT/android/jni/$abi/libdiscord_partner_sdk.so" ]]; then
-      echo "Error: production requires the Discord SDK library for $abi." >&2
-      exit 1
-    fi
-  done
-fi
-
 AUDIT_FLAGS=()
-if [[ "${MORNYE_DISCORD_SDK:-1}" != "0" && -f "$PROJECT_DIR/third_party/mornye_discord/sdk/discord_partner_sdk.aar" ]]; then
-  AUDIT_FLAGS+=(--discord-sdk)
-fi
 
 cd "$PROJECT_DIR"
 if [[ -x "$PROJECT_DIR/.fvm/flutter_sdk/bin/flutter" ]]; then

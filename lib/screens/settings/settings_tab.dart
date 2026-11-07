@@ -14,14 +14,9 @@ import 'package:mornye/screens/settings/appearance_settings_page.dart';
 import 'package:mornye/screens/settings/backup_restore_page.dart';
 import 'package:mornye/screens/settings/cache_management_page.dart';
 import 'package:mornye/screens/settings/donate_page.dart';
-import 'package:mornye/screens/settings/download_settings_page.dart';
-import 'package:mornye/screens/settings/extensions_page.dart';
 import 'package:mornye/screens/settings/files_settings_page.dart';
 import 'package:mornye/screens/settings/keyboard_shortcuts_page.dart';
 import 'package:mornye/screens/settings/library_settings_page.dart';
-import 'package:mornye/screens/settings/link_desktop_settings_page.dart';
-import 'package:mornye/screens/settings/link_settings_page.dart';
-import 'package:mornye/screens/network_storage_screen.dart';
 import 'package:mornye/screens/settings/log_screen.dart';
 import 'package:mornye/screens/settings/lyrics_settings_page.dart';
 import 'package:mornye/screens/settings/metadata_settings_page.dart';
@@ -39,7 +34,6 @@ import 'package:mornye/widgets/app_icon.dart';
 import 'package:mornye/widgets/app_progress_indicator.dart';
 import 'package:mornye/widgets/app_search_field.dart';
 import 'package:mornye/widgets/app_sliver_header.dart';
-import 'package:mornye/widgets/beta_badge.dart';
 import 'package:mornye/widgets/settings_group.dart';
 import 'package:mornye/widgets/profile_avatar.dart';
 import 'package:mornye/widgets/no_scrollbars.dart';
@@ -55,7 +49,6 @@ class _Destination {
     this.keywords = const [],
     this.searchEntries = const [],
     this.showDonationProgress = false,
-    this.beta = false,
   });
 
   final IconData icon;
@@ -64,10 +57,6 @@ class _Destination {
   final String subtitle;
   final Widget Function() pageBuilder;
   final bool showDonationProgress;
-
-  /// Marks the entry with a Beta tag in the phone list. The desktop category
-  /// column is too narrow for it, so those pages show the tag themselves.
-  final bool beta;
 
   /// Extra search terms for things the title does not spell out (e.g. "SAF"
   /// for the Files page), so a user can find a page by what it does.
@@ -255,86 +244,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             searchEntries: searchCatalog.library,
             pageBuilder: () => const LibrarySettingsPage(),
           ),
-          _Destination(
-            icon: Icons.dns_outlined,
-            iconColor: Colors.blueGrey,
-            title: l10n.networkStorage,
-            subtitle: 'SMB · WebDAV · HTTP(S) · Subsonic',
-            keywords: const [
-              'nas',
-              'server',
-              'network',
-              'smb',
-              'webdav',
-              'http',
-            ],
-            pageBuilder: () => const NetworkStorageScreen(),
-          ),
-          if (Platform.isAndroid || Platform.isIOS)
-            _Destination(
-              icon: Icons.computer,
-              iconColor: Colors.deepPurple,
-              title: l10n.linkSettingsTitle,
-              subtitle: l10n.linkSettingsSubtitle,
-              keywords: const [
-                'computer',
-                'desktop',
-                'pc',
-                'mac',
-                'pair',
-                'link',
-                'komputer',
-              ],
-              pageBuilder: () => const LinkSettingsPage(),
-              beta: true,
-            ),
-          if (isDesktopPlatform)
-            _Destination(
-              icon: Icons.phone_android,
-              iconColor: Colors.lightBlue,
-              title: l10n.linkDesktopSettingsTitle,
-              subtitle: l10n.linkDesktopSettingsSubtitle,
-              keywords: const [
-                'phone',
-                'mobile',
-                'pair',
-                'remote',
-                'handoff',
-                'subsonic',
-                'ponsel',
-              ],
-              pageBuilder: () => const LinkDesktopSettingsPage(),
-            ),
         ],
       ),
       _Group(
         destinations: [
-          _Destination(
-            icon: Icons.download_outlined,
-            iconColor: Colors.green,
-            title: l10n.settingsDownload,
-            subtitle: l10n.settingsDownloadSubtitle,
-            keywords: const [
-              'quality',
-              'flac',
-              'concurrent',
-              'network',
-              'wifi',
-              'service',
-              'region',
-            ],
-            searchEntries: searchCatalog.download,
-            pageBuilder: () => const DownloadSettingsPage(),
-          ),
-          _Destination(
-            icon: Icons.extension_outlined,
-            iconColor: Colors.teal,
-            title: l10n.settingsExtensions,
-            subtitle: l10n.settingsExtensionsSubtitle,
-            keywords: const ['plugin', 'provider', 'priority', 'store'],
-            searchEntries: searchCatalog.extensions,
-            pageBuilder: () => const ExtensionsPage(),
-          ),
           _Destination(
             icon: Icons.folder_outlined,
             iconColor: Colors.orange,
@@ -474,7 +387,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       iconColor: _iconColorFor(destination),
       showIconInMornye: true,
       title: destination.title,
-      titleTrailing: destination.beta ? const BetaBadge() : null,
       subtitle: context.isMornye ? null : destination.subtitle,
       footer: destination.showDonationProgress && goal?.isVisible == true
           ? _DonationGoalProgress(goal: goal!)

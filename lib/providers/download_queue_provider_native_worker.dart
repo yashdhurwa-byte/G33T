@@ -196,30 +196,7 @@ extension _DownloadQueueNativeWorker on DownloadQueueNotifier {
   }
 
   bool _canUseAndroidNativeWorker(AppSettings settings) {
-    // Network publication runs in the shared queue after native tag processing.
-    // Do not let the worker publish a local history row or completion early.
-    if (state.items.any((item) => item.networkDownloadFolder.isNotEmpty)) {
-      return false;
-    }
-    if (!Platform.isAndroid || !settings.nativeDownloadWorkerEnabled) {
-      return false;
-    }
-    if (!settings.useExtensionProviders) {
-      return false;
-    }
-    if (_isSafMode(settings)) {
-      if (settings.downloadTreeUri.isEmpty) {
-        return false;
-      }
-    }
-    final extensionState = ref.read(extensionProvider);
-    final hasEnabledDownloadProvider = extensionState.extensions.any(
-      (extension) => extension.enabled && extension.hasDownloadProvider,
-    );
-    if (!hasEnabledDownloadProvider) {
-      return false;
-    }
-    return true;
+    return false;
   }
 
   String _newNativeWorkerRunId() =>

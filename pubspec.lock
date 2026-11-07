@@ -190,54 +190,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.4.1"
-  bonsoir:
-    dependency: "direct main"
-    description:
-      name: bonsoir
-      sha256: "20fed01e4616e625f4bafd9007ff899d231d8d79bebc8564853fa1e3570294a6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.1.5"
-  bonsoir_android:
-    dependency: transitive
-    description:
-      name: bonsoir_android
-      sha256: "543689dae95e8d4df3576afadd1f8a343e0c2760ae44e5095959d870cfbcb7d3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.1.4"
-  bonsoir_darwin:
-    dependency: transitive
-    description:
-      name: bonsoir_darwin
-      sha256: "5fceef2e607db0b63fc7a51fe3c0e4da66ec77e2896acc697bb531cf48b8df0a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.1.2"
-  bonsoir_linux:
-    dependency: transitive
-    description:
-      name: bonsoir_linux
-      sha256: "9afae7bb9509c5bd20a0ea2ca02a0f2b1ef09cca1ceb2ea288ed58a0f03d1e11"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.1.0"
-  bonsoir_platform_interface:
-    dependency: transitive
-    description:
-      name: bonsoir_platform_interface
-      sha256: c08af1733b6ec3bb109e08855f91da6fee52fe57cb6033be2fd6648a74f94de0
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.0.1"
-  bonsoir_windows:
-    dependency: transitive
-    description:
-      name: bonsoir_windows
-      sha256: "22ca4c5dcba2b95fcedb723132a5d65930df3d69634f169eb327c366c9f89151"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.3.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -438,14 +390,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.5"
-  dart_smb2:
-    dependency: "direct main"
-    description:
-      name: dart_smb2
-      sha256: da6393b629259625041cac96941b6929e6e5e36d82f7944a0bb10c4e9f79663e
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.3"
   dart_style:
     dependency: transitive
     description:
@@ -455,21 +399,13 @@ packages:
     source: hosted
     version: "3.1.14"
   dbus:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: dbus
       sha256: a48d5da28e89bd02196e80d81ed8d7954923d00a0f4a68cc20b575038f023383
       url: "https://pub.dev"
     source: hosted
     version: "0.7.15"
-  desktop_drop:
-    dependency: "direct main"
-    description:
-      name: desktop_drop
-      sha256: "47ded09c85909edfed644fd4cbb5051b040d0aed5c79e7e062ea4b3b7156dbe4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.8.4"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -1016,37 +952,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
-  media_kit:
-    dependency: "direct main"
-    description:
-      name: media_kit
-      sha256: ae9e79597500c7ad6083a3c7b7b7544ddabfceacce7ae5c9709b0ec16a5d6643
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.6"
-  media_kit_libs_linux:
-    dependency: "direct main"
-    description:
-      name: media_kit_libs_linux
-      sha256: "2b473399a49ec94452c4d4ae51cfc0f6585074398d74216092bf3d54aac37ecf"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.1"
-  media_kit_libs_macos_audio:
-    dependency: "direct main"
-    description:
-      name: media_kit_libs_macos_audio
-      sha256: "3be21844df98f286de32808592835073cdef2c1a10078bac135da790badca950"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.4"
-  media_kit_libs_windows_audio:
-    dependency: "direct main"
-    description:
-      path: "third_party/media_kit_libs_windows_audio"
-      relative: true
-    source: path
-    version: "1.0.9"
   meta:
     dependency: transitive
     description:
@@ -1063,13 +968,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  mornye_discord:
-    dependency: "direct main"
-    description:
-      path: "third_party/mornye_discord"
-      relative: true
-    source: path
-    version: "0.1.0"
   motor:
     dependency: transitive
     description:
@@ -1406,14 +1304,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
-  safe_local_storage:
-    dependency: transitive
-    description:
-      name: safe_local_storage
-      sha256: "76288b689a3e1fddccb377177feed85d73fdfc64c9c3c52991e2d9aba35c4857"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.7"
   share_plus:
     dependency: "direct main"
     description:
@@ -1507,14 +1397,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  smtc_windows:
-    dependency: "direct main"
-    description:
-      name: smtc_windows
-      sha256: dee279b0ddf663c4c729a88bca4e57fb4861aa1b3d01e230bdbf1277b8bfe664
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   source_gen:
     dependency: transitive
     description:
@@ -1683,22 +1565,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  universal_platform:
-    dependency: transitive
-    description:
-      name: universal_platform
-      sha256: "64e16458a0ea9b99260ceb5467a214c1f298d647c659af1bff6d3bf82536b1ec"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
-  uri_parser:
-    dependency: transitive
-    description:
-      name: uri_parser
-      sha256: "051c62e5f693de98ca9f130ee707f8916e2266945565926be3ff20659f7853ce"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.2"
   url_launcher:
     dependency: "direct main"
     description:

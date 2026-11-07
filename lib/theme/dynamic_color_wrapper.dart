@@ -67,22 +67,16 @@ class DynamicColorWrapper extends ConsumerWidget {
         ColorScheme lightScheme;
         ColorScheme darkScheme;
 
-        if (themeSettings.useDynamicColor &&
-            lightDynamic != null &&
-            darkDynamic != null) {
-          lightScheme = _toFlutterColorScheme(lightDynamic);
-          darkScheme = _toFlutterColorScheme(darkDynamic);
-        } else {
-          final seedColor = themeSettings.seedColor;
-          lightScheme = ColorScheme.fromSeed(
-            seedColor: seedColor,
-            brightness: Brightness.light,
-          );
-          darkScheme = ColorScheme.fromSeed(
-            seedColor: seedColor,
-            brightness: Brightness.dark,
-          );
-        }
+        // Engine B (Google Material UI) strictly locks useDynamicColor: false
+        final seedColor = themeSettings.seedColor;
+        lightScheme = ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.light,
+        );
+        darkScheme = ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.dark,
+        );
 
         if (themeSettings.useAmoled) {
           darkScheme = _applyAmoledColors(darkScheme);
@@ -105,45 +99,6 @@ class DynamicColorWrapper extends ConsumerWidget {
     );
   }
 
-  ColorScheme _toFlutterColorScheme(material_ui.ColorScheme scheme) {
-    return ColorScheme.fromSeed(
-      seedColor: scheme.primary,
-      brightness: scheme.brightness,
-    ).copyWith(
-      primary: scheme.primary,
-      onPrimary: scheme.onPrimary,
-      primaryContainer: scheme.primaryContainer,
-      onPrimaryContainer: scheme.onPrimaryContainer,
-      secondary: scheme.secondary,
-      onSecondary: scheme.onSecondary,
-      secondaryContainer: scheme.secondaryContainer,
-      onSecondaryContainer: scheme.onSecondaryContainer,
-      tertiary: scheme.tertiary,
-      onTertiary: scheme.onTertiary,
-      tertiaryContainer: scheme.tertiaryContainer,
-      onTertiaryContainer: scheme.onTertiaryContainer,
-      error: scheme.error,
-      onError: scheme.onError,
-      errorContainer: scheme.errorContainer,
-      onErrorContainer: scheme.onErrorContainer,
-      outline: scheme.outline,
-      outlineVariant: scheme.outlineVariant,
-      surface: scheme.surface,
-      onSurface: scheme.onSurface,
-      surfaceContainerLowest: scheme.surfaceContainerLowest,
-      surfaceContainerLow: scheme.surfaceContainerLow,
-      surfaceContainer: scheme.surfaceContainer,
-      surfaceContainerHigh: scheme.surfaceContainerHigh,
-      surfaceContainerHighest: scheme.surfaceContainerHighest,
-      onSurfaceVariant: scheme.onSurfaceVariant,
-      inverseSurface: scheme.inverseSurface,
-      onInverseSurface: scheme.onInverseSurface,
-      inversePrimary: scheme.inversePrimary,
-      shadow: scheme.shadow,
-      surfaceTint: scheme.surfaceTint,
-      scrim: scheme.scrim,
-    );
-  }
 
   /// Apply AMOLED colors: a pure black page with a neutral container ladder.
   ///

@@ -7,6 +7,8 @@ import 'package:mornye/utils/desktop_platform.dart';
 
 class AppTheme {
   static const Color defaultSeedColor = Color(kDefaultSeedColor);
+  static const Color sakuraPink = Color(0xFFFCE4EC);
+  static const Color pureWhite = Color(0xFFFFFFFF);
 
   /// Shared surfaces use one radius scale; actions use round Material shapes.
   static const AppTokens _tokens = AppTokens.standard;
@@ -40,20 +42,31 @@ class AppTheme {
     bool useSystemFont = false,
     String? fontFamily,
   }) {
-    final scheme =
+    final baseScheme =
         dynamicScheme ??
         ColorScheme.fromSeed(
           seedColor: seedColor ?? defaultSeedColor,
           brightness: Brightness.light,
         );
+    final scheme = baseScheme.copyWith(
+      primary: defaultSeedColor,
+      surface: pureWhite,
+      surfaceContainerLowest: pureWhite,
+      surfaceContainerLow: sakuraPink,
+      surfaceContainer: sakuraPink,
+      surfaceContainerHigh: sakuraPink,
+      surfaceContainerHighest: sakuraPink,
+    );
     final family = fontFamily ?? (useSystemFont ? null : bundledFontFamily);
     final textTheme = _expressiveTextTheme(family);
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      scaffoldBackgroundColor: pureWhite,
+      canvasColor: pureWhite,
       pageTransitionsTheme: _pageTransitionsTheme,
-      appBarTheme: _appBarTheme(scheme),
+      appBarTheme: _appBarTheme(scheme).copyWith(backgroundColor: pureWhite),
       cardTheme: _cardTheme(scheme),
       elevatedButtonTheme: _elevatedButtonTheme(scheme),
       filledButtonTheme: _filledButtonTheme(scheme),
@@ -193,8 +206,8 @@ class AppTheme {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(_tokens.radiusCard),
     ),
-    color: scheme.surfaceContainerLow,
-    surfaceTintColor: scheme.surfaceTint,
+    color: sakuraPink,
+    surfaceTintColor: Colors.transparent,
   );
 
   static ElevatedButtonThemeData _elevatedButtonTheme(ColorScheme scheme) =>
@@ -394,7 +407,7 @@ class AppTheme {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(_tokens.radiusCard),
     ),
-    backgroundColor: scheme.surfaceContainerLow,
+    backgroundColor: sakuraPink,
     selectedColor: scheme.secondaryContainer,
   );
 
