@@ -5,6 +5,7 @@ import 'package:mornye/providers/player_artwork_video_provider.dart';
 import 'package:mornye/providers/settings_provider.dart';
 import 'package:mornye/widgets/motion_header_banner.dart';
 import 'package:mornye/widgets/player_artwork.dart';
+import 'package:mornye/widgets/turntable_platter.dart';
 import 'package:video_player/video_player.dart';
 
 class MornyePlayerArtwork extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _MornyePlayerArtworkState extends ConsumerState<MornyePlayerArtwork> {
     // taller than wide and crops the sides). A video keeps the square cover
     // at its top while it loads, since its own frame may be wider.
     final fallback = widget.videoUrl == null
-        ? SizedBox.expand(child: cover)
+        ? Center(child: TurntablePlatter(mediaItem: widget.mediaItem))
         : Align(
             alignment: Alignment.topCenter,
             child: AspectRatio(aspectRatio: 1, child: cover),

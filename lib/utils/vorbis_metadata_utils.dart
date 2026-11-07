@@ -127,6 +127,37 @@ class MetadataBlockPictureExtractor {
 
 /// Offline exporter for Vorbis comments lyrics to .lrc sidecar files.
 class VorbisLyricsExporter {
+  /// Discovers offline lyrics for [audioPath], prioritizing:
+  /// 1. Offline sidecar .lrc file at `<base>.lrc`
+  /// 2. Embedded Vorbis tags (`lyrics`, `syncedlyrics`, `unsyncedlyrics`, `comment`)
+  static Future<String?> findOfflineLyrics(String audioPath) async {
+    try {
+      if (!audioPath.startsWith('network://') && !audioPath.startsWith('content://')) {
+        final lrcPath = '${p.withoutExtension(audioPath)}.lrc';
+        final lrcFile = File(lrcPath);
+        if (await lrcFile.exists()) {
+          final content = await lrcFile.readAsString();
+          if (content.trim().isNotEmpty) {
+            return content.trim();
+          }
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final metadata = await PlatformBridge.readFileMetadata(audioPath);
+      final rawLyrics = metadata['lyrics']?.toString() ??
+          metadata['syncedlyrics']?.toString() ??
+          metadata['unsyncedlyrics']?.toString() ??
+          metadata['comment']?.toString();
+      if (rawLyrics != null && rawLyrics.trim().isNotEmpty) {
+        return rawLyrics.trim();
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
   /// Reads Vorbis comments from an audio file and exports them to an offline .lrc file.
   static Future<VorbisLrcExportResult> exportToLrc(
     String audioPath, {

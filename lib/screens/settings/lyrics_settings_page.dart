@@ -19,6 +19,7 @@ import 'package:mornye/utils/lyrics_provider_names.dart';
 import 'package:mornye/utils/nav_bar_inset.dart';
 import 'package:mornye/widgets/lyrics_options_button.dart';
 import 'package:mornye/widgets/lyrics_size_setting.dart';
+import 'package:mornye/services/notification_lyrics_bridge.dart';
 
 class LyricsSettingsPage extends ConsumerWidget {
   const LyricsSettingsPage({super.key});
@@ -52,6 +53,19 @@ class LyricsSettingsPage extends ConsumerWidget {
                 if (context.isMornye && ref.watch(mornyeLiquidGlassProvider))
                   const LyricsBlurSetting(),
                 const LyricsOffsetSetting(),
+                StatefulBuilder(
+                  builder: (context, setState) => SettingsSwitchItem(
+                    icon: Icons.notifications_active_outlined,
+                    title: 'One UI Notification Lyrics Bridge',
+                    subtitle: 'Stream real-time synchronized lyrics to system media notification panel and lock screen ticker',
+                    value: NotificationLyricsBridge.instance.isEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        NotificationLyricsBridge.instance.setEnabled(value);
+                      });
+                    },
+                  ),
+                ),
                 SettingsSwitchItem(
                   icon: Icons.light_mode_outlined,
                   title: context.l10n.lyricsKeepScreenOn,

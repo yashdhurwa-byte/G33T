@@ -41,57 +41,51 @@ class AppearanceSettingsPage extends ConsumerWidget {
               ),
 
             ...settingsSectionSlivers(
-              title: context.l10n.appearanceStyle,
+              title: 'Theme Engine',
               children: [
-                for (final style in AppThemeStyle.values)
-                  ListTile(
-                    title: Wrap(
-                      spacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          style == AppThemeStyle.mornye ? 'Mornye' : 'Material',
-                        ),
-                        if (style == AppThemeStyle.mornye)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'Beta',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    leading: context.isMornye
-                        ? null
-                        : AppIcon(
-                            style == AppThemeStyle.mornye
-                                ? Icons.music_note_outlined
-                                : Icons.palette_outlined,
-                          ),
-                    trailing: themeSettings.style == style
-                        ? AppIcon(
-                            Icons.check_circle,
-                            color: Theme.of(context).colorScheme.primary,
-                          )
-                        : null,
-                    selected: themeSettings.style == style,
-                    onTap: () =>
-                        ref.read(themeProvider.notifier).setStyle(style),
+                ListTile(
+                  title: const Text(
+                    'Engine A (Mornye Engine)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
+                  subtitle: const Text(
+                    '#000000 AMOLED black · #8B5CF6 electric violet · #FFFFFF white',
+                  ),
+                  leading: const AppIcon(Icons.album),
+                  trailing: themeSettings.style == AppThemeStyle.mornye
+                      ? AppIcon(
+                          Icons.check_circle,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
+                      : null,
+                  selected: themeSettings.style == AppThemeStyle.mornye,
+                  onTap: () {
+                    ref.read(themeProvider.notifier).setStyle(AppThemeStyle.mornye);
+                    ref.read(themeProvider.notifier).setMornyeAccent(MornyeAccent.purple);
+                  },
+                ),
+                ListTile(
+                  title: const Text(
+                    'Engine B (Google Material UI)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    '#FFFFFF background · #FCE4EC Sakura pink pills · #6A1B9A Deep Royal Purple',
+                  ),
+                  leading: const AppIcon(Icons.palette_outlined),
+                  trailing: themeSettings.style == AppThemeStyle.material
+                      ? AppIcon(
+                          Icons.check_circle,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
+                      : null,
+                  selected: themeSettings.style == AppThemeStyle.material,
+                  onTap: () {
+                    ref.read(themeProvider.notifier).setStyle(AppThemeStyle.material);
+                    ref.read(themeProvider.notifier).setUseDynamicColor(false);
+                    ref.read(themeProvider.notifier).setSeedColor(const Color(0xFF6A1B9A));
+                  },
+                ),
               ],
             ),
 

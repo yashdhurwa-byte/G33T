@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:audio_service/audio_service.dart';
+import 'package:path/path.dart' as p;
 import 'package:mornye/services/network_metadata_service.dart';
 import 'package:mornye/services/platform_bridge.dart';
 import 'package:mornye/utils/int_utils.dart';
@@ -122,7 +124,29 @@ Future<Map<String, dynamic>> readPlaybackFileMetadataWithRetry(
     try {
       final metadata = await read(path);
       final reportedError = metadata['error']?.toString().trim() ?? '';
-      if (reportedError.isEmpty) return metadata;
+      if (reportedError.isEmpty) {
+        final resultMap = Map<String, dynamic>.from(metadata);
+        final lyrics = resultMap['lyrics']?.toString().trim() ?? '';
+        if (lyrics.isEmpty) {
+          final altLyrics = resultMap['syncedlyrics']?.toString().trim() ??
+              resultMap['unsyncedlyrics']?.toString().trim() ??
+              '';
+          if (altLyrics.isNotEmpty) {
+            resultMap['lyrics'] = altLyrics;
+          } else if (!path.startsWith('network://') && !path.startsWith('content://')) {
+            try {
+              final lrcFile = File('${p.withoutExtension(path)}.lrc');
+              if (lrcFile.existsSync()) {
+                final content = lrcFile.readAsStringSync().trim();
+                if (content.isNotEmpty) {
+                  resultMap['lyrics'] = content;
+                }
+              }
+            } catch (_) {}
+          }
+        }
+        return resultMap;
+      }
       lastError = StateError(reportedError);
       lastStack = StackTrace.current;
     } catch (error, stack) {

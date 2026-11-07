@@ -48,5 +48,29 @@ G33T (Mornye) is a high-performance, audiophile-grade mobile music utility built
 
 ---
 
-## STAGE 2: (Upcoming)
-- Advanced audiophile playback pipeline calibration, offline caching enhancements, and extended playlist management.
+## STAGE 2: Turntable UI, Offline Navigation, Notification Lyrics, & Dual Theme Engines
+
+### 1. Digital Vinyl Platter & Now Playing UI
+- Interactive spinning turntable/vinyl platter interface with continuous unidirectional looping (no reverse snap-backs on pause/seek/loop).
+- Realistic vinyl grooves, specular sheen reflection, center circular album art label, and metallic spindle pin.
+- Gesture controls: tap for play/pause, horizontal drag for scratching/manual rotation, and horizontal swipe/fling to skip tracks.
+- Integrated synchronized lyrics view supporting both embedded Vorbis comments and local `.lrc` sidecars.
+
+### 2. Custom Folder & Album Navigation
+- Offline folder hierarchy browser with interactive breadcrumb navigation, SAF/storage indicators, and folder statistics.
+- Responsive Album Grid view wired to local `sqflite` (`LibraryDatabase`) and SAF scanner with custom cover art caching via `CoverCacheManager`.
+
+### 3. One UI Notification Lyrics Bridge
+- Hooks into Android `MediaSession` and media notification metadata pipeline.
+- Streams live synchronized lyric lines directly to the system media notification panel and Samsung One UI lock screen ticker.
+- Gracefully restores base track metadata on pause or track switch.
+
+### 4. Theme Engine Switcher
+- Live settings toggle cleanly switching between:
+  - **Engine A (Mornye Engine):** Pure Black AMOLED (`#000000`), Electric Violet (`#8B5CF6`), Stark White (`#FFFFFF`).
+  - **Engine B (Material UI):** White background (`#FFFFFF`), Sakura Pink pills/cards (`#FCE4EC`), Deep Royal Purple accents (`#6A1B9A`), with `useDynamicColor: false`.
+- Instant live updates across seekbars, pills, cards, and navigation bars without application restart.
+
+### Validation Criteria
+- `cargo check --workspace`: 0 errors, 0 warnings.
+- `flutter analyze`: 0 errors, 0 warnings.

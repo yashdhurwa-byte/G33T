@@ -10,7 +10,6 @@ import 'package:mornye/providers/settings_provider.dart';
 import 'package:mornye/routes/now_playing_route.dart';
 import 'package:mornye/theme/app_motion.dart';
 import 'package:mornye/utils/playback_seek_preview.dart';
-import 'package:mornye/widgets/player_artwork.dart';
 import 'package:mornye/widgets/player_compact_bar.dart';
 import 'package:mornye/widgets/player_gesture_regions.dart';
 import 'package:mornye/widgets/player_lyrics_controls.dart';
@@ -18,6 +17,7 @@ import 'package:mornye/widgets/player_metadata_title.dart';
 import 'package:mornye/widgets/playback_source_label.dart';
 import 'package:mornye/widgets/player_playback_controls.dart';
 import 'package:mornye/widgets/player_volume_control.dart';
+import 'package:mornye/widgets/turntable_platter.dart';
 
 class MaterialPlayerLayout extends StatelessWidget {
   const MaterialPlayerLayout({
@@ -74,73 +74,11 @@ class MaterialPlayerLayout extends StatelessWidget {
                 ),
               )
             : Center(
-                child: PlayerArtworkDragRegion(
-                  child: Hero(
-                    tag: kNowPlayingArtworkHeroTag,
-                    child: Consumer(
-                      builder: (context, ref, artwork) {
-                        final resting =
-                            !ref.watch(playbackPlayingProvider) &&
-                            !ref.watch(playbackLoadingProvider);
-                        final motion = AppMotion.spatialSlow(
-                          context,
-                          AppMotionSpec(
-                            MediaQuery.disableAnimationsOf(context)
-                                ? Duration.zero
-                                : const Duration(milliseconds: 500),
-                            Curves.easeOutBack,
-                          ),
-                        );
-                        return AnimatedScale(
-                          scale: resting ? 0.9 : 1,
-                          duration: motion.duration,
-                          curve: motion.curve,
-                          child: TweenAnimationBuilder<double>(
-                            tween: Tween(end: resting ? 40 : 20),
-                            duration: motion.duration,
-                            curve: motion.curve,
-                            builder: (context, radius, artwork) => ClipRRect(
-                              borderRadius: BorderRadius.circular(radius),
-                              child: artwork,
-                            ),
-                            child: artwork,
-                          ),
-                        );
-                      },
-                      child: SizedBox(
-                        width: artSize,
-                        height: artSize,
-                        child: AnimatedSwitcher(
-                          duration: MediaQuery.disableAnimationsOf(context)
-                              ? Duration.zero
-                              : const Duration(milliseconds: 450),
-                          switchInCurve: Curves.easeOutCubic,
-                          switchOutCurve: Curves.easeInCubic,
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(
-                                opacity: animation,
-                                child: ScaleTransition(
-                                  scale: Tween(
-                                    begin: 0.94,
-                                    end: 1.0,
-                                  ).animate(animation),
-                                  child: child,
-                                ),
-                              ),
-                          child: PlayerArtwork(
-                            key: ValueKey(
-                              mediaItem.artUri?.toString() ?? mediaItem.id,
-                            ),
-                            artUri: mediaItem.artUri?.toString(),
-                            colorScheme: colorScheme,
-                            cacheWidth:
-                                (artSize *
-                                        MediaQuery.devicePixelRatioOf(context))
-                                    .round(),
-                          ),
-                        ),
-                      ),
-                    ),
+                child: Hero(
+                  tag: kNowPlayingArtworkHeroTag,
+                  child: TurntablePlatter(
+                    mediaItem: mediaItem,
+                    size: artSize,
                   ),
                 ),
               );

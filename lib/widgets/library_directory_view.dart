@@ -563,6 +563,62 @@ class _LibraryDirectoryViewState extends ConsumerState<LibraryDirectoryView>
         actions: _playActions(folder),
       );
 
+  Widget _buildBreadcrumbs(BuildContext context, LibraryDirectory folder) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isSaf = folder.path.startsWith('content://') || folder.key.contains('saf');
+    final segments = folder.path.split(RegExp(r'[\\/]')).where((s) => s.isNotEmpty).toList();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ActionChip(
+            avatar: Icon(
+              isSaf ? Icons.sd_card_outlined : Icons.folder_special_outlined,
+              size: 16,
+              color: colorScheme.primary,
+            ),
+            label: Text(
+              isSaf ? 'SAF Storage' : 'Storage',
+              style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          ),
+          for (int i = 0; i < segments.length; i++) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            ActionChip(
+              label: Text(
+                segments[i],
+                style: textTheme.labelSmall?.copyWith(
+                  fontWeight: i == segments.length - 1 ? FontWeight.bold : FontWeight.normal,
+                  color: i == segments.length - 1 ? colorScheme.primary : colorScheme.onSurface,
+                ),
+              ),
+              onPressed: i == segments.length - 1
+                  ? null
+                  : () {
+                      final pops = segments.length - 1 - i;
+                      var count = 0;
+                      Navigator.of(context).popUntil((route) => count++ >= pops);
+                    },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   List<Widget> _buildFolder(
     BuildContext context,
     LibraryDirectory folder, {
@@ -587,15 +643,10 @@ class _LibraryDirectoryViewState extends ConsumerState<LibraryDirectoryView>
     final details = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (folder.key.isNotEmpty)
-          Text(
-            folder.path,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
+        if (folder.key.isNotEmpty) ...[
+          _buildBreadcrumbs(context, folder),
+          const SizedBox(height: 6),
+        ],
         Text(
           _summary(folder),
           style: textTheme.bodyMedium?.copyWith(
